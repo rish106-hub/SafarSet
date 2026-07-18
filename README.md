@@ -41,7 +41,26 @@ Implementation code stays on scoped branches until explicitly approved.
 
 Current implementation branch:
 
-- `codex/spec1`
+- `codex/spec2-demo-slice`
+
+## Local Demo
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000), then:
+
+1. Review protected trip benefit.
+2. Edit or accept family recovery policy.
+3. Open active Paris to Dubai to Delhi trip.
+4. Inject deterministic disruption.
+5. Run safe recovery.
+6. Review confirmations, rejected alternatives, and audit trail.
+7. Use `Reset demo` to start again.
+
+Demo state stays in this browser. It needs no external credentials.
 
 ## Core Direction
 
