@@ -8,7 +8,7 @@ SafarSet is a deterministic family travel-disruption recovery concierge. Current
 
 ## Requirements
 
-- Node.js 20.9 or newer
+- Node.js 20.19 or newer
 - npm
 
 ## Commands
