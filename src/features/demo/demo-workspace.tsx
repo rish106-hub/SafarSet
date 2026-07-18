@@ -1,16 +1,22 @@
 "use client";
 
-import { useMemo, useRef, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 
 import { runDemoRecovery } from "@/application/services/run-demo-recovery";
 import { WorkspaceNav } from "@/components/layout/workspace-nav";
 import { SourceMode, type RecoveryPolicy } from "@/domain";
-import { fixtureMetadata, HERO_NOW } from "@/data";
+import { createHeroTrip, fixtureMetadata, HERO_NOW } from "@/data";
 import { AuditPanel } from "@/features/audit/audit-panel";
 import { BenefitEntry } from "@/features/landing/benefit-entry";
 import { PolicyPanel } from "@/features/policy/policy-panel";
 import { RecoveryPanel } from "@/features/recovery/recovery-panel";
 import { TripPanel } from "@/features/trip/trip-panel";
+import { getRecoveryRepository } from "@/persistence/client";
+import {
+  HERO_TRIP_ID,
+  PERSISTENCE_VERSION,
+  type RecoveryEvidence,
+} from "@/persistence/contracts/recovery-repository";
 
 import {
   disruptionTimelineItem,
@@ -20,6 +26,7 @@ import {
   resetDemoState,
   subscribeDemoState,
   updateDemoState,
+  writeDemoState,
 } from "./state";
 import type { DemoState, DemoView, RecoveryTimelineItem } from "./types";
 
@@ -80,6 +87,21 @@ export function DemoWorkspace() {
   );
   const state = useMemo(() => parseDemoState(snapshot), [snapshot]);
   const runningRef = useRef(false);
+
+  useEffect(() => {
+    let active = true;
+    void getRecoveryRepository().load(HERO_TRIP_ID).then(({ evidence, mode }) => {
+      if (!active) return;
+      if (evidence) {
+        writeDemoState({ ...evidence.uiState, persistenceMode: mode });
+      } else {
+        updateDemoState((current) => ({ ...current, persistenceMode: mode }));
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const navigate = (view: DemoView) =>
     updateDemoState((current) => ({ ...current, view }));
@@ -148,15 +170,38 @@ export function DemoWorkspace() {
         }));
       }
 
-      updateDemoState((current) => ({
-        ...current,
-        phase: "recovered",
-        result,
-        audit: [...current.audit, ...result.audit],
-        usedIdempotencyKeys: result.decision.idempotencyKey
-          ? [...current.usedIdempotencyKeys, result.decision.idempotencyKey]
-          : current.usedIdempotencyKeys,
-      }));
+      updateDemoState((current) => {
+        const completedState: DemoState = {
+          ...current,
+          phase: "recovered",
+          result,
+          audit: [...current.audit, ...result.audit],
+          usedIdempotencyKeys: result.decision.idempotencyKey
+            ? [...current.usedIdempotencyKeys, result.decision.idempotencyKey]
+            : current.usedIdempotencyKeys,
+        };
+        return completedState;
+      });
+      const completedState = parseDemoState(getDemoSnapshot());
+      if (result.decision.idempotencyKey) {
+        const now = new Date().toISOString();
+        const evidence: RecoveryEvidence = {
+          version: PERSISTENCE_VERSION,
+          policy: completedState.policy,
+          trip: createHeroTrip(),
+          run: {
+            id: result.decision.idempotencyKey,
+            startedAt: HERO_NOW,
+            completedAt: HERO_NOW,
+            result,
+          },
+          audit: completedState.audit,
+          uiState: completedState,
+          updatedAt: now,
+        };
+        const mode = await getRecoveryRepository().save(evidence);
+        updateDemoState((current) => ({ ...current, persistenceMode: mode }));
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Unknown recovery error.";
@@ -244,6 +289,7 @@ function View({
       return (
         <AuditPanel
           events={state.audit}
+          persistenceMode={state.persistenceMode}
           onBack={() => onNavigate("recovery")}
         />
       );

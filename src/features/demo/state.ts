@@ -16,6 +16,7 @@ export const initialDemoState: DemoState = {
   audit: [],
   usedIdempotencyKeys: [],
   error: null,
+  persistenceMode: "LOCAL",
 };
 
 const initialSnapshot = JSON.stringify(initialDemoState);
@@ -42,7 +43,8 @@ function isDemoState(value: unknown): value is DemoState {
     Array.isArray(value.timeline) &&
     Array.isArray(value.audit) &&
     Array.isArray(value.usedIdempotencyKeys) &&
-    (value.error === null || typeof value.error === "string")
+    (value.error === null || typeof value.error === "string") &&
+    (value.persistenceMode === "LOCAL" || value.persistenceMode === "SUPABASE")
   );
 }
 
