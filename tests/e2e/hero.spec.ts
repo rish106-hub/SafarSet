@@ -55,7 +55,9 @@ test("truth and controls remain usable at 390px", async ({ page }) => {
   await page.getByRole("button", { name: "Review protected trip" }).click();
   await openWorkspaceView(page, "API truth");
   await expect(page.getByRole("heading", { name: "What is real here" })).toBeVisible();
-  await expect(page.getByTestId("truth-table").getByText("FIXTURE", { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByTestId("truth-table").getByText("OPTIONAL_LIVE", { exact: true }).first(),
+  ).toBeVisible();
   const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: window.innerWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.inner);
 });

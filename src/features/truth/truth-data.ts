@@ -11,17 +11,17 @@ export type CapabilityTruth = Readonly<{
 export const capabilityTruth: readonly CapabilityTruth[] = [
   {
     capability: "Flight status",
-    level: "FIXTURE",
-    source: "Seeded Paris delay",
+    level: "OPTIONAL_LIVE",
+    source: "Amadeus when live mode is configured",
     transaction: "Read-only demo data",
-    fallback: "Fixture always available",
+    fallback: "Seeded Paris delay",
   },
   {
     capability: "Alternative search",
-    level: "FIXTURE",
-    source: "Three deterministic candidates",
+    level: "OPTIONAL_LIVE",
+    source: "Amadeus offers when usable",
     transaction: "No airline inventory hold",
-    fallback: "Fixture always available",
+    fallback: "Three deterministic candidates",
   },
   {
     capability: "Ticket reissue",

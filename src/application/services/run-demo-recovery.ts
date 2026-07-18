@@ -18,6 +18,7 @@ import {
   demoTransferProvider,
   demoTravelProvider,
 } from "@/providers/demo";
+import type { TravelProvider } from "@/providers/contracts";
 
 export type DemoActionResult = Readonly<{
   id: string;
@@ -61,9 +62,11 @@ export function getOvernightStayWindow(candidate: RecoveryCandidate): Readonly<{
 export async function runDemoRecovery(input: {
   policy: RecoveryPolicy;
   usedIdempotencyKeys: ReadonlySet<string>;
+  travelProvider?: TravelProvider;
 }): Promise<DemoRecoveryResult> {
   const trip = createHeroTrip();
-  const status = await demoTravelProvider.getFlightStatus({ trip });
+  const travelProvider = input.travelProvider ?? demoTravelProvider;
+  const status = await travelProvider.getFlightStatus({ trip, observedAt: HERO_NOW });
   const detectedInput = createHeroInput();
   const preliminary = evaluateRecovery({
     ...detectedInput,
@@ -78,11 +81,12 @@ export async function runDemoRecovery(input: {
     return { decision: preliminary, actions: [], audit: [] };
   }
 
-  const candidates = await demoTravelProvider.searchAlternatives({
+  const candidates = await travelProvider.searchAlternatives({
     trip,
     disruption: preliminary.disruption,
     family: heroFamily,
     policy: input.policy,
+    observedAt: HERO_NOW,
   });
   const decision = evaluateRecovery({
     ...detectedInput,
@@ -96,7 +100,7 @@ export async function runDemoRecovery(input: {
     {
       id: "audit-status",
       at: HERO_NOW,
-      label: "Status fixture read",
+      label: "Flight status read",
       detail: "Paris delay makes Dubai connection impossible.",
       provider: status.provider,
     },
@@ -124,6 +128,7 @@ export async function runDemoRecovery(input: {
     throw new Error("Selected recovery candidate is missing.");
   }
 
+  // Spec 6 is enrichment only. Ticket execution remains visibly simulated.
   const rebooking = await demoTravelProvider.executeRebooking({
     tripId: trip.id,
     candidate: selected,
