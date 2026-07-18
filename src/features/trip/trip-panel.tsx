@@ -13,11 +13,13 @@ export function TripPanel({
   candidate,
   onInject,
   onOpenRecovery,
+  providerMode,
 }: Readonly<{
   phase: DemoPhase;
   candidate?: RecoveryCandidate;
   onInject: () => void;
   onOpenRecovery: () => void;
+  providerMode: "demo" | "live";
 }>) {
   const disrupted = phase !== "ready";
 
@@ -111,7 +113,9 @@ export function TripPanel({
               <h2 className="text-sm font-semibold">Demo control</h2>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-400">
-              Inject fixed Paris delay. No live airline call or real booking.
+              {providerMode === "live"
+                ? "Live status and search are attempted. Bad data falls back to fixtures. Booking stays simulated."
+                : "Inject fixed Paris delay. No live airline call or real booking."}
             </p>
             {disrupted ? (
               <Button

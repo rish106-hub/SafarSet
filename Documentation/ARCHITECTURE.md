@@ -22,6 +22,8 @@ demo, Supabase, Resend, Gemini, and Amadeus adapters
 
 Adapters never change engine rules. Application services coordinate I/O around a completed deterministic decision.
 
+The Amadeus adapter is server-only. A client fallback wrapper rejects stale, incomplete, conflicting, unavailable, or discontinuous live data before it reaches the engine. Valid live offers are added beside deterministic fixtures, never substituted for the fixture floor. Live status and search can enrich the flow. Execution always uses the demo adapter.
+
 ## Planned Tree
 
 ```text

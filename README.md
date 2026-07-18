@@ -151,7 +151,7 @@ Implementation work stays on scoped branches until explicitly approved.
 
 Current implementation branch:
 
-- `codex/spec5-hardening`
+- `codex/spec6-amadeus`
 
 ## Demo Notes
 
@@ -237,6 +237,19 @@ Real email delivery is excluded from the normal test suite. Trigger one syntheti
 npm run test:integration:resend
 ```
 
+## Optional Amadeus Enrichment
+
+Demo mode is the default and makes no Amadeus call. To attempt live flight status and alternative search, set these server-only values in `.env.local`:
+
+```bash
+PROVIDER_MODE=live
+AMADEUS_ENVIRONMENT=test
+AMADEUS_API_KEY=
+AMADEUS_API_SECRET=
+```
+
+Missing, stale, conflicting, timed-out, or unusable responses fall back to fixtures. Usable live offers are added beside fixture offers, so they cannot remove the known-valid demo route. Amadeus can enrich status and search only. Ticket, hotel, and transfer execution remain simulated.
+
 ## Safety Rules
 
 - Use synthetic travellers only.
@@ -247,7 +260,7 @@ npm run test:integration:resend
 
 ## Limits and Cost
 
-- Flight status and alternative search use fixtures until Spec 6 adds optional Amadeus enrichment.
+- Flight status and alternative search use fixtures by default, with optional Amadeus enrichment in live mode.
 - Ticket, hotel, transfer, and payment execution are simulated.
 - Transit airports are a user allow-list, not automated visa advice.
 - Supabase, Gemini, and Resend are optional. Free local demo cost is INR 0.
