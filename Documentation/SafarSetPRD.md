@@ -2,257 +2,371 @@
 
 ## Product Summary
 
-SafarSet is a travel planning and trip readiness assistant designed for an Amex-style hackathon context.
+SafarSet is a family travel-disruption recovery concierge.
 
-The core idea is simple: travelers do not need another generic itinerary app. They need one place that turns a trip into clear actions: what to book, what to pack, what to budget, what card benefits to use, and what still needs attention before departure.
+It detects a cancellation or missed connection, searches for alternative routes, rejects unsafe or policy-breaking options, ranks valid choices, and executes a simulated recovery within a pre-approved spending limit.
 
-SafarSet helps users create a trip plan from basic inputs and converts it into a practical checklist, spending view, benefit suggestions, and travel readiness score.
+The deterministic recovery engine is the product. External services can improve the experience, but the core demo must work without them.
+
+Product promise:
+
+> Your family's trip is recovered before you need to manage it.
+
+## Product Context
+
+SafarSet is a personal, portfolio-grade build inspired by the CodeStreet brief.
+
+It should not be presented as:
+
+- An eligible CodeStreet submission unless the team confirms eligibility.
+- A production ticketing platform.
+- A real travel agency.
+- A real payment, reissue, or visa-compliance system.
+
+The correct framing is:
+
+- Premium card travel benefit.
+- Safe autonomous recovery.
+- Deterministic policy enforcement.
+- Transparent simulation and auditability.
+
+## Primary User
+
+An affluent, dual-income Indian family travelling internationally with children.
+
+## Buyer
+
+A premium credit-card issuer offering SafarSet as a card benefit.
+
+## North Star Metric
+
+Trusted Autonomous Recovery Rate.
+
+Definition:
+
+The percentage of eligible disruptions recovered within five minutes without human help, hard-policy violations, duplicate actions, or later reversal.
 
 ## Problem
 
-Trip planning is fragmented.
+International family travel breaks under disruption.
 
-Users usually plan across chats, notes, booking sites, card portals, spreadsheets, maps, and screenshots. That creates missed benefits, weak budgeting, poor packing decisions, and last-minute stress.
+When a cancellation or missed connection happens, the family needs fast recovery across flights, hotel, transfers, and notifications. Current options are slow and stressful:
 
-For Amex or a premium financial services context, the bigger missed opportunity is that card-linked travel benefits are often underused. Users may have lounge access, travel insurance, hotel offers, forex advantages, dining offers, or reward-point options, but they do not know when each benefit matters.
+- Airline counters are crowded.
+- Apps show options but do not enforce family policies.
+- Families risk split itineraries, unsafe transfers, cabin downgrades, or bad layovers.
+- Premium card issuers often provide travel benefits, but not real-time recovery help.
+- Human support can be expensive, delayed, and hard to audit.
 
-## Target Users
+The user does not need another itinerary planner. The user needs a trusted recovery system that acts only inside clear rules.
 
-- Students and young professionals planning domestic or international trips.
-- Families planning multi-day vacations.
-- Business travelers who need a fast pre-trip checklist.
-- Cardholders who want to use travel benefits without manually reading terms.
-- Travel planners who want budgeting, packing, and bookings in one workflow.
+## Product Principles
 
-## User Pain Points
+1. Deterministic decisions: an LLM never chooses a flight, approves spending, or interprets safety rules.
+2. Visible honesty: every provider response and action shows whether it is live, fixture-backed, or simulated.
+3. Demo first: the complete hero flow works with no API keys.
+4. Safe autonomy: hard constraints are never traded away.
+5. Graceful degradation: failure of Amadeus, Supabase, Resend, or Gemini cannot break the core demo.
 
-- "I do not know what I am forgetting before the trip."
-- "I have offers or card benefits, but I do not know which ones apply."
-- "My trip budget lives in one place and my itinerary lives somewhere else."
-- "Packing lists are too generic."
-- "Group trips become messy because expenses, bookings, and tasks are split."
-- "Travel prep becomes urgent only at the last minute."
+## Hero Scenario
 
-## Proposed Solution
+A synthetic Gurgaon family of four is returning from Paris through Dubai to Delhi.
 
-SafarSet creates a trip workspace from a few inputs:
+The Paris to Dubai flight is delayed enough to make the Dubai to Delhi connection impossible.
 
-- Destination.
-- Dates.
-- Travel purpose.
-- Budget range.
-- Number of travelers.
-- Existing bookings.
-- Card or membership benefits.
-- Preferences such as food, pace, weather tolerance, accessibility, and travel style.
+SafarSet must:
 
-The product then generates:
+1. Detect the missed connection.
+2. Search alternative routes for all four travellers.
+3. Reject routes that split the family, use self-transfer, downgrade the cabin, use an unapproved transit airport, miss the arrival deadline, or violate the connection buffer.
+4. Rank valid routes using an explainable score.
+5. Select the highest-ranked route within the pre-approved spending limit.
+6. Execute a clearly labelled simulated ticket reissue.
+7. Simulate an airport-hotel booking and transfer reschedule when needed.
+8. Produce an in-app confirmation and optional real email.
+9. Store inputs, rejected choices, decision, actions, and notification in an audit trail.
 
-- A practical itinerary.
-- A personalized packing list.
-- A trip budget.
-- A benefit and offer recommendation layer.
-- A readiness checklist.
-- A risk and reminder view.
+## Family Recovery Policy
 
-## Product Goals
+The seeded family can edit these rules:
 
-- Reduce trip planning time.
-- Make travel benefits easier to understand and use.
-- Help users avoid missed bookings, documents, packing items, and budget overruns.
-- Make group travel coordination easier.
-- Produce a clear demo that judges can understand in under three minutes.
+- Keep all travellers together.
+- Never use self-transfer.
+- Allow at most one stop.
+- Preserve premium economy or better.
+- Use only explicitly approved transit airports.
+- Require at least 90 minutes for international connections.
+- Avoid overnight waits as a soft preference.
+- Arrive in Delhi before Sunday at 8 PM.
+- Automatically spend up to INR 75,000.
 
-## Non-Goals
+Transit safety uses a user-approved airport allow-list.
 
-- SafarSet is not a full online travel agency.
-- SafarSet does not replace flight or hotel booking engines in the MVP.
-- SafarSet does not provide legal, visa, medical, or financial advice.
-- SafarSet does not need live Amex production APIs for the hackathon MVP. Mocked card benefits and offers are acceptable for demo.
+SafarSet must not claim to maintain a global visa-rules database.
 
-## Core MVP Features
+## Core Product Flow
 
-### 1. Trip Intake
+1. User opens the card-benefit landing page.
+2. User reviews seeded family profile and recovery policy.
+3. User enters or views active trip details.
+4. User triggers a live status check or injects the demo disruption.
+5. SafarSet detects the disruption.
+6. SafarSet evaluates recovery candidates.
+7. SafarSet rejects invalid options with clear reasons.
+8. SafarSet ranks valid options.
+9. SafarSet decides whether to book, request approval, or escalate.
+10. SafarSet executes simulated recovery actions.
+11. User sees confirmed itinerary, hotel, transfer, explanation, and audit trail.
 
-Users enter destination, dates, travelers, budget, trip type, and preferences.
+## MVP Features
 
-The intake must be short. The product should not feel like a long form.
+### 1. Card-Benefit Landing Page
 
-### 2. Smart Itinerary Builder
+The first screen should explain the premium-card recovery benefit in plain language and lead directly into the working demo.
 
-SafarSet creates a day-wise plan with:
+Avoid a generic travel marketing page.
 
-- Morning, afternoon, and evening blocks.
-- Estimated cost per block.
-- Travel time notes.
-- Weather-aware suggestions if weather data is available.
-- Free time buffers.
+### 2. Seeded Family and Editable Policy
 
-### 3. Personalized Packing List
+Show the synthetic family, trip, and recovery policy.
 
-Packing list should adapt to:
+Users can edit policy rules such as spending limit, approved transit airports, cabin minimum, connection buffer, and arrival deadline.
 
-- Destination.
-- Weather.
-- Trip length.
-- Activities.
-- Traveler type.
-- Business or leisure purpose.
+### 3. Active-Trip Dashboard
 
-The list should be editable.
+Show:
 
-### 4. Budget and Spend Planner
+- Current trip.
+- Flight segments.
+- Family profile.
+- Recovery policy summary.
+- Current status.
+- Source labels.
 
-Users should see estimated costs across:
+### 4. Disruption Detection
 
-- Travel.
-- Stay.
-- Food.
-- Local transport.
-- Activities.
-- Shopping.
-- Emergency buffer.
+The app must include a reliable `Inject disruption` control for the hero scenario.
 
-The MVP can use manual or estimated values. It does not need bank transaction sync.
+It should also support optional provider-backed status checks later.
 
-### 5. Amex Benefit Match
+### 5. Recovery Timeline
 
-SafarSet suggests relevant benefits or offers based on trip context.
+Show each step:
 
-Examples:
+- Disruption detected.
+- Alternatives searched.
+- Hard constraints checked.
+- Invalid candidates rejected.
+- Valid candidates ranked.
+- Decision made.
+- Simulated actions executed.
+- Confirmation sent or logged.
 
-- Lounge access reminder for airport travel.
-- Hotel credit or upgrade reminder.
-- Travel insurance reminder.
-- Dining offer near destination.
-- Forex markup warning or card recommendation.
-- Reward points redemption suggestion.
+### 6. Confirmed Recovery View
 
-For the MVP, this can use a mock benefits database.
+Show:
 
-### 6. Readiness Score
+- New itinerary.
+- Hotel change if needed.
+- Transfer reschedule if needed.
+- Cost impact.
+- Simulation labels such as `SIMULATED_REISSUE`.
 
-SafarSet gives a simple trip readiness score.
+### 7. Why This Route?
 
-Inputs can include:
+Show the selected route and rejected alternatives.
 
-- Documents added.
-- Bookings confirmed.
-- Packing completed.
-- Budget confirmed.
-- Benefits reviewed.
-- Emergency contacts added.
+Each rejected option must include the exact failed rule.
 
-The score should be useful, not decorative.
+### 8. Audit Timeline
 
-### 7. Group Trip Mode
+Persist and display:
 
-Basic group mode can include:
+- Inputs.
+- Provider responses.
+- Constraint results.
+- Ranking decision.
+- Recovery actions.
+- Notification status.
 
-- Shared checklist.
-- Assigned tasks.
-- Shared budget estimate.
-- Expense split placeholder.
+### 9. API Truth Table
 
-This is optional for MVP if time is tight.
+Show whether each capability is:
 
-## User Journey
+- Live.
+- Fixture-backed.
+- Simulated.
+- Unavailable.
 
-1. User creates a new trip.
-2. User enters basic trip details.
-3. SafarSet generates a trip workspace.
-4. User reviews itinerary, packing list, budget, and benefit matches.
-5. User edits the plan.
-6. User marks items as done.
-7. SafarSet updates the readiness score.
+This is part of the product surface, not a hidden disclaimer.
 
-## Data Model
+### 10. Evaluation Dashboard
 
-### Trip
+Run fixture scenarios and show:
+
+- Hard-constraint compliance.
+- Duplicate execution count.
+- Recovery success when valid candidates exist.
+- Decision latency.
+- Failure handling.
+
+## Recovery Engine Requirements
+
+Keep `src/engine/` pure.
+
+No network access. No database access. No provider calls.
+
+Required modules:
+
+- `detector.ts`
+- `constraints.ts`
+- `ranking.ts`
+- `autonomy.ts`
+- `idempotency.ts`
+
+### Hard Constraints
+
+SafarSet must never autonomously select a route unless:
+
+- Entire family has seats on one itinerary.
+- No self-transfer is required.
+- Route has no more than one stop.
+- Cabin is premium economy or better.
+- Every transit airport is on the approved list.
+- Every international connection is at least 90 minutes.
+- Arrival is before the hard deadline.
+
+### Ranking Weights
+
+Rank only candidates that pass every hard constraint.
+
+- Arrival delay: 40%
+- Incremental cost: 25%
+- Number of stops: 15%
+- Overnight inconvenience: 10%
+- Departure wait: 10%
+
+Soft preferences affect ranking only.
+
+### Autonomy Rules
+
+Automatically book when:
+
+- Every hard constraint passes.
+- Incremental cost is at or below INR 75,000.
+- The selected price is no more than five minutes old.
+- Provider data is consistent.
+- The execution adapter reports availability.
+
+Request approval when:
+
+- Cost exceeds the automatic spending limit.
+- A policy rule explicitly requires approval.
+- User previously marked a choice as approval-only.
+
+Escalate without acting when:
+
+- No valid route exists.
+- Provider data conflicts.
+- Price or availability cannot be verified.
+- Execution returns an unknown result.
+
+### Idempotency
+
+The idempotency key is a stable hash of:
 
 - Trip ID.
-- Destination.
-- Start date.
-- End date.
-- Number of travelers.
-- Budget range.
-- Purpose.
-- Preferences.
+- Disruption ID.
+- Selected itinerary ID.
 
-### Itinerary Item
+The same disruption and itinerary must not execute twice.
 
-- Day.
-- Time block.
-- Activity.
-- Location.
-- Estimated cost.
-- Notes.
+## Data and Privacy
 
-### Packing Item
+Use only synthetic travellers.
 
-- Name.
-- Category.
-- Quantity.
-- Required or optional.
-- Completed status.
+Never collect:
 
-### Budget Item
+- Real passport data.
+- Real payment-card data.
+- Real PNR data.
+- Real child data.
 
-- Category.
-- Estimated cost.
-- Actual cost.
-- Payment method.
+## Operating Modes
 
-### Benefit
+### DEMO
 
-- Benefit name.
-- Benefit type.
-- Eligibility rule.
-- Recommended action.
-- Source.
+- Deterministic fixtures.
+- Simulated transactions.
+- No external credentials.
+- Complete hero flow works offline from external APIs.
 
-### Readiness Task
+### LIVE
 
-- Task name.
-- Category.
-- Due date.
-- Completed status.
-- Priority.
+- Best-effort Amadeus status and alternative search.
+- Simulated execution remains.
+- Automatic fallback to demo data when live data is missing, stale, or unavailable.
 
 ## Success Metrics
 
-- Time to create first trip plan.
-- Number of checklist items completed.
-- Number of relevant benefits surfaced.
-- User rating of plan usefulness.
-- Budget variance between estimated and actual spend.
-- Demo clarity: judge can understand the product in under three minutes.
+- Hero recovery completes in under five minutes from disruption.
+- Engine decision completes in under two seconds without external calls.
+- 100% hard-constraint compliance across fixtures.
+- Zero duplicate executions.
+- Zero autonomous action on conflicting provider data.
+- At least 95% recovery success when a valid candidate and successful execution path exist.
+- Five consecutive browser hero runs pass.
 
-## Risks
+## Non-Goals
 
-- Benefit recommendations can become vague if the benefits database is weak.
-- Trip planning can become too broad if the MVP tries to do everything.
-- AI-generated itineraries can be generic without strong constraints.
-- Live integrations may burn too much hackathon time.
-- If the UI looks like a landing page instead of a working tool, the demo will feel shallow.
+- Real ticket reissue.
+- Real hotel booking.
+- Real transfer booking.
+- Real payment processing.
+- Native mobile apps.
+- Production authentication.
+- Multi-user account system.
+- Global visa interpretation.
+- LLM-based decision authority.
 
-## MVP Scope Recommendation
+## Key Risks
 
-Build a working trip workspace first.
+### Over-Scoping
 
-Priority order:
+Travel products expand fast.
 
-1. Trip intake.
-2. Generated itinerary.
-3. Packing list.
-4. Budget planner.
-5. Mock Amex benefit matching.
-6. Readiness score.
+Mitigation:
 
-Avoid overbuilding bookings, real payment rails, and complex group expense splitting for the first version.
+- One synthetic family.
+- One hero itinerary.
+- Deterministic recovery engine first.
+- Optional integrations only after demo mode works.
 
-## Assumptions
+### Unsafe Autonomy
 
-- The repo did not contain the referenced Amex chat or prior idea notes at the time this PRD was created.
-- This document treats SafarSet as a travel readiness and benefit-matching product for an Amex-style hackathon.
-- Any exact Amex challenge rules, judging criteria, or API requirements should be added once available.
+Autonomy is only acceptable if the system is conservative.
+
+Mitigation:
+
+- Hard constraints are non-negotiable.
+- Conflicts trigger escalation.
+- Unknown execution states do not retry booking.
+
+### Weak Honesty Surface
+
+If simulation is hidden, the product looks fake.
+
+Mitigation:
+
+- Put live, fixture-backed, and simulated labels directly in the UI.
+- Add an API Truth Table.
+
+### Demo Fragility
+
+External APIs can fail.
+
+Mitigation:
+
+- Demo mode must not require secrets.
+- Fixture-backed flow must remain complete.
+- Live mode cannot weaken demo mode.

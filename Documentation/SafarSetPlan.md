@@ -2,260 +2,353 @@
 
 ## Build Objective
 
-Create a hackathon-ready MVP for SafarSet: a travel readiness assistant that converts trip details into an itinerary, packing list, budget plan, benefit suggestions, and readiness score.
+Build SafarSet as a reliable demo of autonomous family travel-disruption recovery.
 
-The product should feel like a working tool on the first screen. Avoid a marketing-style landing page.
+The target output is a deployed Vercel app, public GitHub repo, README, API Truth Table, tests, and a short screen recording of the hero flow.
 
-## Demo Narrative
+The first release must prove the deterministic recovery engine. It should not chase real ticketing, payments, visa checks, or a broad travel-planning product.
 
-The demo should answer one question fast:
+## Demo Promise
 
-"How does SafarSet help an Amex traveler prepare better for a trip?"
+Show that a premium cardholder family can be recovered from a missed international connection without manual panic.
 
-Recommended demo flow:
+The demo must make this clear:
 
-1. Create a trip to a known destination.
-2. Generate the workspace.
-3. Show itinerary, packing list, budget, and Amex benefit matches.
-4. Mark a few checklist items complete.
-5. Show the readiness score improving.
-6. End with the value: fewer missed tasks, clearer budget, better benefit usage.
+- The family stays together.
+- Unsafe or policy-breaking routes are rejected.
+- The selected route is explainable.
+- The recovery action stays within the pre-approved limit.
+- Every simulated action is visibly labelled.
+- The audit trail proves what happened.
+
+## Hero Demo
 
-## MVP Feature Plan
+Seeded scenario:
 
-### Phase 1: Foundation
+- Family: synthetic Gurgaon family of four.
+- Route: Paris to Dubai to Delhi.
+- Disruption: Paris to Dubai delay makes Dubai to Delhi connection impossible.
+- Policy: keep family together, no self-transfer, at most one stop, premium economy or better, approved transit airports only, 90-minute international connection buffer, Delhi before Sunday 8 PM, auto-spend up to INR 75,000.
 
-- Set up the app structure.
-- Create routes or views for:
-  - Trip intake.
-  - Trip dashboard.
-  - Itinerary.
-  - Packing.
-  - Budget.
-  - Benefits.
-- Add local mock data.
-- Add responsive layout.
+Expected demo flow:
 
-### Phase 2: Trip Workspace
+1. Open landing page.
+2. View seeded family and recovery policy.
+3. Open active trip dashboard.
+4. Inject disruption.
+5. Watch recovery timeline.
+6. View rejected alternatives and reasons.
+7. View selected route and simulated actions.
+8. View audit timeline.
+9. Open API Truth Table.
+10. Run evaluation dashboard.
 
-- Build short trip intake form.
-- Store trip state locally.
-- Generate a trip dashboard from user inputs.
-- Show destination, dates, travelers, budget, and readiness score.
+## Stage 1: Engine and Fixtures
 
-### Phase 3: Itinerary
+### Scope
 
-- Generate day-wise itinerary blocks.
-- Include activity name, time, cost, and notes.
-- Allow basic edit or regenerate actions.
-- Keep output structured so it looks credible.
+- Define domain types.
+- Create deterministic demo data.
+- Implement recovery engine.
+- Create 40 scenario fixtures.
+- Write hero demo script as an acceptance document.
 
-### Phase 4: Packing List
+### Domain Types
 
-- Generate packing items by category.
-- Add complete/incomplete state.
-- Add optional and required labels.
-- Include weather or activity-based items when possible.
+Create under `src/domain/`:
 
-### Phase 5: Budget Planner
+- `RecoveryPolicy`
+- `FamilyProfile`
+- `Trip`
+- `FlightSegment`
+- `DisruptionEvent`
+- `RecoveryCandidate`
+- `ConstraintCheck`
+- `RecoveryDecision`
+- `RecoveryAction`
+- `RecoveryRun`
 
-- Show budget categories.
-- Show estimated spend.
-- Show total trip estimate.
-- Add emergency buffer.
-- Allow manual cost edits if time permits.
+Every provider response includes:
 
-### Phase 6: Amex Benefit Layer
+```ts
+type ProviderMetadata = {
+  source: string;
+  isSimulated: boolean;
+  observedAt: string;
+  confidence: number;
+};
+```
 
-- Create mock benefit data.
-- Match benefits to trip context.
-- Show why each benefit is relevant.
-- Add a recommended next action.
+### Engine Modules
 
-Example benefit categories:
+Create under `src/engine/`:
 
-- Airport lounge.
-- Hotel upgrade or credit.
-- Dining offer.
-- Travel insurance.
-- Forex or international payment.
-- Reward points redemption.
+- `detector.ts`: normalize status events and identify impossible connections.
+- `constraints.ts`: run every hard check and return pass or fail with reason.
+- `ranking.ts`: rank only candidates that passed every hard check.
+- `autonomy.ts`: decide whether to book, request approval, or escalate.
+- `idempotency.ts`: prevent duplicate execution.
 
-### Phase 7: Polish and Demo Hardening
+### Exit Criteria
 
-- Add empty states.
-- Add loading states if generation is simulated.
-- Add error states for missing trip inputs.
-- Make mobile layout usable.
-- Prepare one strong demo trip.
-- Test the full demo path repeatedly.
+- All engine tests pass.
+- Hard-constraint compliance is 100%.
+- Duplicate actions are zero.
+- Decision completes in under two seconds without external calls.
 
-## Suggested Tech Plan
+## Stage 2: Demo Vertical Slice
 
-Recommended simple stack for speed:
+### Scope
 
-- Frontend: React or Next.js.
-- Styling: Tailwind CSS or existing design system.
-- State: local state first.
-- Data: static JSON mock data first.
-- AI: optional. Use structured prompts or deterministic templates if API setup is slow.
-- Persistence: localStorage or Supabase if team already knows it.
+- Create the Next.js interface.
+- Implement seeded policy and active trip.
+- Add disruption injection.
+- Add recovery timeline.
+- Add confirmation views.
+- Add rejected-alternative explanations.
+- Add source badges.
+- Store demo state in browser storage.
 
-Do not start with complex backend work unless the hackathon requires it.
+### Required Screens
 
-## Data Needed
+1. Card-benefit landing page.
+2. Seeded family and editable recovery policy.
+3. Active-trip dashboard.
+4. Live status check and reliable `Inject disruption` control.
+5. Autonomous recovery timeline.
+6. Confirmed itinerary, hotel, and transfer changes.
+7. `Why this route?` explanation with rejected alternatives.
+8. Audit timeline.
+9. API Truth Table.
+10. Evaluation dashboard.
 
-### Mock Trip Data
+### Exit Criteria
 
-- Destination.
-- Dates.
-- Travelers.
-- Budget.
-- Trip purpose.
-- Preferences.
+The hero scenario runs from start to finish with no API keys.
 
-### Mock Benefit Data
+## Stage 3: Audit and Persistence
 
-- Benefit name.
-- Category.
-- Eligibility conditions.
-- Recommended action.
-- Short explanation.
+### Scope
 
-### Mock Activity Data
+- Add Supabase tables.
+- Store each recovery run server-side.
+- Read audit timeline back from Supabase.
+- Keep browser-storage fallback.
 
-- Destination.
-- Activity type.
-- Time of day.
-- Cost range.
-- Duration.
+### Supabase Tables
 
-### Mock Packing Rules
+- `policies`
+- `trips`
+- `recovery_runs`
+- `audit_events`
 
-- Weather.
-- Trip length.
-- Business or leisure.
-- Beach, city, mountain, international, domestic.
+### Persisted Events
 
-## Team Roles
+Store:
 
-### Product
+- Inputs.
+- Candidate routes.
+- Rejection reasons.
+- Provider results.
+- Ranking decision.
+- Recovery actions.
+- Notification status.
 
-- Own user journey.
-- Keep scope tight.
-- Prepare demo script.
+### Exit Criteria
 
-### Frontend
+- Audit history survives refresh when Supabase is available.
+- Complete hero flow still works when Supabase is unavailable.
 
-- Build trip intake and dashboard.
-- Build itinerary, packing, budget, and benefits views.
-- Make the UI stable and responsive.
+## Stage 4: Notifications and Prose
 
-### Backend or Data
+### Scope
 
-- Create mock data structure.
-- Add generation logic.
-- Add persistence if needed.
+- Add Resend for optional real confirmation email using synthetic data.
+- Add Gemini only to convert a final structured decision into plain-language prose.
+- Keep deterministic notification templates as default and fallback.
 
-### Pitch
+### Rules
 
-- Define problem.
-- Explain Amex fit.
-- Prepare three-minute walkthrough.
-- Show business value clearly.
+- Gemini must not choose routes.
+- Gemini must not approve spend.
+- Gemini must not interpret safety policy.
+- Resend failure must not block in-app confirmation.
 
-## Timeline
+### Exit Criteria
 
-### First 2 Hours
+- One real integration test proves email delivery.
+- Gemini or Resend failure does not affect recovery decision or in-app confirmation.
 
-- Freeze MVP scope.
-- Choose stack.
-- Create basic app.
-- Define mock data.
-- Sketch demo flow.
+## Stage 5: Honesty Surface and Polish
 
-### Hours 3 to 6
+### Scope
 
-- Build intake.
-- Build dashboard.
-- Build itinerary and packing list.
+- Add API Truth Table.
+- Add policy editor.
+- Add evaluation dashboard.
+- Add one-click reset.
+- Polish responsive layout down to 390px.
+- Add Playwright tests.
+- Add GitHub Actions.
 
-### Hours 7 to 10
+### Exit Criteria
 
-- Build budget planner.
-- Build benefit matching.
-- Add readiness score.
+- Five consecutive browser runs pass.
+- Truth labels remain visible.
+- Deployed demo works without external services.
 
-### Hours 11 to 14
+## Stage 6: Optional Amadeus Adapter
 
-- Improve UI.
-- Add demo data.
-- Fix rough edges.
-- Test mobile and desktop.
+### Scope
 
-### Final Stretch
+- Add live status and alternative search only.
+- Hide live behavior behind `PROVIDER_MODE=live`.
+- Label Amadeus results as live.
+- Fall back to fixtures when data is missing, stale, or unavailable.
 
-- Rehearse demo.
-- Remove broken features.
-- Keep only what works.
-- Prepare final pitch.
+### Exit Criteria
 
-## Product Decisions
+Live mode adds data but cannot weaken or break demo mode.
 
-- Prefer fewer features that work over many half-working screens.
-- Use mocked benefits if real Amex data is unavailable.
-- Keep the core screen action-oriented.
-- Do not make users read long explanations inside the product.
-- Make every generated recommendation explain its reason in one short line.
+## Provider Interfaces
 
-## Demo Trip Recommendation
+Create adapters under `src/providers/`.
 
-Use one concrete trip for the demo:
+```ts
+interface TravelProvider {
+  getFlightStatus(input: FlightStatusInput): Promise<FlightStatusResult>;
+  searchAlternatives(input: AlternativeSearchInput): Promise<RecoveryCandidate[]>;
+  executeRebooking(input: RebookingInput): Promise<RebookingResult>;
+}
 
-- Destination: Singapore or Tokyo.
-- Duration: 5 days.
-- Traveler: young professional.
-- Budget: mid-range.
-- Purpose: leisure with some premium travel behavior.
+interface AccommodationProvider {
+  modifyStay(input: StayChangeInput): Promise<StayChangeResult>;
+}
 
-This makes Amex benefit matching easier to show: lounge, hotel, dining, forex, insurance, and rewards.
+interface TransferProvider {
+  rescheduleTransfer(input: TransferChangeInput): Promise<TransferChangeResult>;
+}
 
-## Validation Checklist
+interface NotificationProvider {
+  sendRecoveryConfirmation(input: RecoveryMessage): Promise<NotificationResult>;
+}
+```
 
-- User can create a trip.
-- Dashboard appears after intake.
-- Itinerary has useful structure.
-- Packing list can be checked off.
-- Budget total is visible.
-- Benefits are tied to trip context.
-- Readiness score changes after task completion.
-- Demo works without live external dependencies.
+Each interface needs a deterministic demo implementation first.
 
-## Scope Cuts If Time Is Short
+Optional adapters:
 
-Cut in this order:
+- Amadeus status and search.
+- Resend email.
+- Supabase persistence.
+- Gemini prose.
 
-1. Real login.
-2. Real APIs.
-3. Group trip mode.
-4. Expense splitting.
-5. Advanced AI regeneration.
-6. Map integration.
+## Verification Plan
 
-Keep:
+### Unit and Scenario Tests
 
-- Trip intake.
-- Dashboard.
-- Itinerary.
-- Packing list.
-- Budget.
-- Benefit matching.
-- Readiness score.
+Create at least 40 fixtures covering:
 
-## Open Questions
+- Cancellation.
+- Missed connection.
+- Family split.
+- Insufficient seats.
+- Disallowed transit airport.
+- Self-transfer.
+- Cabin downgrade.
+- Late arrival.
+- Cost over limit.
+- Stale price.
+- Duplicate disruption.
+- Conflicting provider data.
+- Provider timeout.
+- Email failure.
+- No valid route.
+- Overnight hotel requirement.
 
-- Is the hackathon specifically tied to Amex APIs, or only the Amex travel and cardholder context?
-- Does the judging rubric prioritize technical integrations, business value, or user experience?
-- Should SafarSet target Indian travelers, US travelers, or a global cardholder audience?
-- Is the intended user a premium cardholder, student traveler, business traveler, or broad consumer?
-- Should the final MVP include AI generation, or can deterministic rules be enough for the demo?
+Required assertions:
+
+- 100% hard-constraint compliance.
+- Zero duplicate execution.
+- Zero autonomous action on conflicting data.
+- At least 95% recovery success when a valid candidate and successful execution path exist.
+- Decision completes in under two seconds without external latency.
+
+### Browser Tests
+
+Playwright covers:
+
+1. Seed family.
+2. Edit and save policy.
+3. Inject disruption.
+4. Run autonomous recovery.
+5. Confirm itinerary, hotel, and transfer actions.
+6. Display explanation and source badges.
+7. Populate audit timeline.
+8. Reset and repeat.
+
+Mock Resend in Playwright.
+
+Do not send real email during the browser suite.
+
+Keep one separate, manually triggered integration test for real email delivery.
+
+### Resilience Checks
+
+- Disable every API key and complete the hero flow.
+- Make Supabase unavailable and verify browser-storage fallback.
+- Make Gemini fail and verify deterministic prose.
+- Make Resend fail and verify in-app confirmation plus logged notification failure.
+- Return an unknown execution state and verify escalation without a second booking attempt.
+- Render at 390px and verify that all controls and truth labels remain usable.
+
+## Deliverables
+
+Core deliverables:
+
+- Deployed Vercel application.
+- Public GitHub repository.
+- README with setup, architecture, limitations, costs, and test commands.
+- API Truth Table.
+- Short screen recording of the hero flow.
+
+Optional deliverables:
+
+- Eight-slide pitch deck.
+- Formal evaluation report.
+- Separate architecture document.
+
+## Cost and Secrets
+
+Target cost: INR 0.
+
+Keep billing disabled and stay within free tiers.
+
+Server-side environment variables:
+
+```text
+AMADEUS_CLIENT_ID
+AMADEUS_CLIENT_SECRET
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+RESEND_API_KEY
+GEMINI_API_KEY
+APP_BASE_URL
+PROVIDER_MODE
+```
+
+Stages 1 and 2 require no secrets.
+
+Add credentials only when their stage begins.
+
+## Scope Guards
+
+- One synthetic family.
+- One hero itinerary.
+- Deterministic engine only.
+- No real ticket, hotel, transfer, or payment transaction.
+- No native mobile application.
+- No production authentication or multi-user account system.
+- No global visa interpretation.
+- No dependency may make demo mode unreliable.
+- If an integration blocks progress, ship the previous stage's complete exit state.

@@ -2,299 +2,457 @@
 
 ## Review Summary
 
-SafarSet should use the simplest stack that can support a polished hackathon demo.
+SafarSet should be built around a deterministic recovery engine, not an AI travel planner.
 
-The product risk is not raw engineering difficulty. The risk is trying to build too many travel features and ending up with a shallow demo. The stack should help the team move fast, mock data cleanly, and show a believable product workflow.
+The technical bar is not "can we call APIs." The technical bar is whether the product can safely decide what it is allowed to do, reject unsafe choices, explain the decision, avoid duplicate execution, and keep working when optional services fail.
+
+The stack should protect the demo from fragile integrations.
 
 ## Recommended Stack
 
-### Frontend
+### Application
 
-Use React or Next.js.
+Use:
 
-Reason:
-
-- Fast component development.
-- Easy routing.
-- Good support for dashboards and forms.
-- Easy deployment.
-
-If the team has no strong backend need, a React single-page app is enough.
-
-### Styling
-
-Use Tailwind CSS.
+- Next.js App Router.
+- React.
+- TypeScript.
 
 Reason:
 
-- Fast iteration.
-- Easy responsive design.
-- Low setup cost.
-- Good for dashboards and tool surfaces.
+- Strong fit for a responsive PWA.
+- Easy routing for the required screens.
+- Good deployment path through Vercel.
+- TypeScript helps keep domain and engine logic explicit.
 
-Avoid spending time on a heavy custom design system during the hackathon.
+### UI
 
-### State
+Use:
 
-Use local state first.
-
-Add localStorage if the app needs persistence across refresh.
-
-Reason:
-
-- The MVP does not need complex server state.
-- Most demo data can live in memory or static JSON.
-- Fewer backend bugs.
-
-### Data
-
-Use static JSON files for:
-
-- Benefits.
-- Packing rules.
-- Sample activities.
-- Demo trips.
-- Budget categories.
+- Tailwind CSS.
+- shadcn/ui.
+- Lucide icons.
 
 Reason:
 
-- Easy to inspect.
-- Easy to edit during demo prep.
-- No external dependency failure.
+- Fast dashboard development.
+- Good components for forms, tables, timelines, tabs, dialogs, and badges.
+- Easy responsive polish down to 390px.
 
-### Backend
+Avoid a heavy custom design system in the first release.
 
-Use a backend only if needed.
+### Testing
 
-Good reasons to add a backend:
+Use:
 
-- AI generation.
-- Auth.
-- Shared group trips.
-- Saving trips across devices.
-
-Bad reasons:
-
-- It feels more complete.
-- The stack looks more serious.
-- The team wants to show complexity.
-
-For the hackathon MVP, backend should be optional.
-
-### AI Layer
-
-Use AI only where it improves the demo:
-
-- Itinerary generation.
-- Packing list generation.
-- Benefit explanation.
-
-Do not depend on AI for every screen. Have fallback mock outputs.
+- Vitest for recovery-engine tests.
+- Playwright for browser tests.
+- GitHub Actions for test and build checks.
 
 Reason:
 
-- API failures kill demos.
-- Deterministic mock data is easier to control.
-- Judges care more about whether the product solves a real problem.
+- The core product claim depends on testable policy behavior.
+- Unit tests prove hard constraints and idempotency.
+- Browser tests prove the hero flow actually works.
 
-### Database
+### Persistence
 
-Recommended MVP path:
+Use:
 
-- No database for first build.
-- localStorage for persistence.
-- Supabase only if the team needs auth or saved trips.
+- Browser localStorage for demo fallback.
+- Supabase Free for optional server-side persistence.
 
 Reason:
 
-- Travel planning data can be modeled locally for demo.
-- Database setup can distract from product polish.
+- Demo mode must work without Supabase.
+- Supabase is useful for audit history, but it cannot be a hard dependency.
+- Vercel server functions are stateless, so do not rely on server memory for fallback persistence.
+
+### Notifications
+
+Use:
+
+- Deterministic in-app confirmation first.
+- Resend Free for optional real email.
+
+Reason:
+
+- Email is useful for demo credibility.
+- Email failure must not block recovery.
+- Playwright should mock Resend.
+
+### AI
+
+Use:
+
+- Gemini Free Tier for prose only.
+
+Gemini may:
+
+- Convert structured recovery decisions into plain-language explanations.
+- Rewrite confirmations.
+
+Gemini must not:
+
+- Choose a flight.
+- Approve spending.
+- Interpret safety rules.
+- Override constraints.
+- Create hidden policy logic.
+
+### Travel Data
+
+Use:
+
+- Deterministic fixtures first.
+- Amadeus Self-Service only as an optional adapter for status and search.
+
+Reason:
+
+- The hero flow needs stable data.
+- Live data can be stale, unavailable, or unsuitable for synthetic trips.
+- Live mode should enrich the demo, not control it.
 
 ### Deployment
 
-Use Vercel or Netlify.
+Use:
+
+- Vercel Hobby.
 
 Reason:
 
-- Fast deployment.
-- Good for React and Next.js.
-- Easy preview links.
+- Fits Next.js.
+- Simple preview and production deployment.
+- Free-tier friendly.
 
-## Proposed Architecture
+## Things Not To Add In First Release
 
-```text
-User
-  -> Trip Intake
-  -> Trip State
-  -> Generation Engine
-       -> Itinerary Rules
-       -> Packing Rules
-       -> Budget Rules
-       -> Benefit Matching Rules
-  -> Trip Dashboard
-       -> Itinerary View
-       -> Packing View
-       -> Budget View
-       -> Benefits View
-       -> Readiness Score
-```
+Do not add:
 
-## Benefit Matching Logic
+- LangChain.
+- AutoGen.
+- Redis.
+- Native mobile apps.
+- WhatsApp.
+- Payment processing.
+- Visa-rules API.
+- Real ticket reissue.
 
-The Amex benefit layer can work without live APIs.
+These create complexity without improving the core proof.
 
-Use rules like:
+## Architecture Review
+
+Recommended architecture:
 
 ```text
-IF trip includes flight
-THEN show airport lounge benefit
-
-IF destination is international
-THEN show forex and travel insurance reminders
-
-IF stay category includes hotel
-THEN show hotel credit or upgrade benefit
-
-IF itinerary includes dining
-THEN show dining offer recommendations
+Next.js App
+  -> UI screens
+  -> Demo state and local storage
+  -> Recovery orchestration
+       -> TravelProvider
+       -> AccommodationProvider
+       -> TransferProvider
+       -> NotificationProvider
+  -> Pure Recovery Engine
+       -> detector
+       -> constraints
+       -> ranking
+       -> autonomy
+       -> idempotency
+  -> Optional Services
+       -> Supabase
+       -> Resend
+       -> Gemini
+       -> Amadeus
 ```
 
-This is enough for a hackathon demo if the UI clearly explains why each benefit appears.
+Critical rule:
 
-## Suggested File Structure
+`src/engine/` must be pure. No network calls, database calls, randomness, or hidden provider dependency.
+
+## Domain Model Review
+
+Create explicit domain types under `src/domain/`:
+
+- `RecoveryPolicy`
+- `FamilyProfile`
+- `Trip`
+- `FlightSegment`
+- `DisruptionEvent`
+- `RecoveryCandidate`
+- `ConstraintCheck`
+- `RecoveryDecision`
+- `RecoveryAction`
+- `RecoveryRun`
+
+Every provider result should include:
+
+```ts
+type ProviderMetadata = {
+  source: string;
+  isSimulated: boolean;
+  observedAt: string;
+  confidence: number;
+};
+```
+
+This metadata is not optional. It powers the honesty surface.
+
+## Provider Adapter Review
+
+Use interfaces for external actions:
+
+```ts
+interface TravelProvider {
+  getFlightStatus(input: FlightStatusInput): Promise<FlightStatusResult>;
+  searchAlternatives(input: AlternativeSearchInput): Promise<RecoveryCandidate[]>;
+  executeRebooking(input: RebookingInput): Promise<RebookingResult>;
+}
+
+interface AccommodationProvider {
+  modifyStay(input: StayChangeInput): Promise<StayChangeResult>;
+}
+
+interface TransferProvider {
+  rescheduleTransfer(input: TransferChangeInput): Promise<TransferChangeResult>;
+}
+
+interface NotificationProvider {
+  sendRecoveryConfirmation(input: RecoveryMessage): Promise<NotificationResult>;
+}
+```
+
+Build deterministic demo adapters before live adapters.
+
+Every restricted transaction must show labels such as:
+
+- `SIMULATED_REISSUE`
+- `SIMULATED_HOTEL_CHANGE`
+- `SIMULATED_TRANSFER_CHANGE`
+
+Simulation is part of the interface.
+
+## Recovery Engine Review
+
+### Detector
+
+Connection is impossible when:
+
+Estimated arrival plus required connection time is later than the next departure.
+
+### Constraints
+
+Hard constraints:
+
+- Entire family has seats on one itinerary.
+- No self-transfer.
+- No more than one stop.
+- Cabin is premium economy or better.
+- Every transit airport is approved.
+- Every international connection is at least 90 minutes.
+- Arrival is before the hard deadline.
+
+The engine must return a pass or fail result with a human-readable reason for each check.
+
+### Ranking
+
+Rank only candidates that passed every hard check.
+
+Weights:
+
+- Arrival delay: 40%
+- Incremental cost: 25%
+- Number of stops: 15%
+- Overnight inconvenience: 10%
+- Departure wait: 10%
+
+### Autonomy
+
+Automatically book only when:
+
+- Every hard constraint passes.
+- Incremental cost is within INR 75,000.
+- Selected price is no more than five minutes old.
+- Provider data is consistent.
+- Execution adapter reports availability.
+
+Request approval when:
+
+- Cost exceeds automatic limit.
+- A policy rule requires approval.
+- User marked a choice as approval-only.
+
+Escalate without acting when:
+
+- No valid route exists.
+- Provider data conflicts.
+- Price or availability cannot be verified.
+- Execution returns unknown result.
+
+### Idempotency
+
+Use a stable hash of:
+
+- Trip ID.
+- Disruption ID.
+- Selected itinerary ID.
+
+No duplicate execution should be possible for the same disruption and itinerary.
+
+## UI Review
+
+The app should feel like an operations cockpit for a premium card travel benefit.
+
+Recommended screens:
+
+1. Card-benefit landing page.
+2. Seeded family and editable policy.
+3. Active-trip dashboard.
+4. Status check and disruption injection.
+5. Autonomous recovery timeline.
+6. Confirmed itinerary, hotel, and transfer changes.
+7. Route explanation and rejected alternatives.
+8. Audit timeline.
+9. API Truth Table.
+10. Evaluation dashboard.
+
+UI standards:
+
+- Source badges must be visible.
+- Simulated actions must be labelled in the main flow.
+- Buttons must be stable at mobile width.
+- Tables must remain readable at 390px.
+- Avoid generic travel imagery and bloated landing-page sections.
+
+## API Truth Table
+
+The API Truth Table should show each capability:
+
+- Flight status.
+- Alternative search.
+- Ticket reissue.
+- Hotel modification.
+- Transfer reschedule.
+- Email notification.
+- Plain-language explanation.
+- Audit persistence.
+
+Each row should show:
+
+- Provider.
+- Current mode.
+- Live, fixture-backed, simulated, or unavailable.
+- Failure fallback.
+- User-visible label.
+
+This is a trust feature.
+
+## Mode Review
+
+### DEMO Mode
+
+Must require no secrets.
+
+Uses:
+
+- Deterministic fixtures.
+- Simulated transactions.
+- Browser storage.
+- Optional local generated output.
+
+### LIVE Mode
+
+Hidden behind:
 
 ```text
-src/
-  app/
-  components/
-    trip/
-    itinerary/
-    packing/
-    budget/
-    benefits/
-  data/
-    benefits.json
-    packingRules.json
-    sampleActivities.json
-    demoTrips.json
-  lib/
-    generateItinerary.ts
-    generatePackingList.ts
-    matchBenefits.ts
-    calculateReadiness.ts
+PROVIDER_MODE=live
 ```
 
-## Engineering Priorities
+Uses:
 
-### Must Have
+- Best-effort Amadeus status and search.
+- Simulated execution.
+- Fallback to fixtures.
 
-- Fast loading.
-- Clean trip intake.
-- Stable dashboard.
-- Mock data that looks realistic.
-- Clear benefit recommendations.
-- No broken buttons in demo path.
+Live mode must never weaken demo mode.
 
-### Should Have
+## Cost Review
 
-- Editable checklist.
-- Budget category updates.
-- Readiness score update.
-- Mobile responsive layout.
+Target cost is INR 0.
 
-### Could Have
+Free-tier services:
 
-- AI-generated itinerary.
-- Saved trips.
-- Group tasks.
-- Share link.
+- Vercel Hobby.
+- Supabase Free.
+- Resend Free.
+- Gemini Free Tier.
+- Amadeus Self-Service.
 
-### Avoid
+Stages 1 and 2 should need no secrets.
 
-- Real booking integrations.
-- Complex auth.
-- Payment flows.
-- Overbuilt maps.
-- Too many external APIs.
+Environment variables:
 
-## UX Review
+```text
+AMADEUS_CLIENT_ID
+AMADEUS_CLIENT_SECRET
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+RESEND_API_KEY
+GEMINI_API_KEY
+APP_BASE_URL
+PROVIDER_MODE
+```
 
-The app should feel like a travel operations cockpit, not a brochure.
+## Testing Review
 
-Recommended layout:
+Minimum scenario suite:
 
-- Left or top navigation for trip sections.
-- Main dashboard with readiness score, next actions, and trip summary.
-- Tabs for itinerary, packing, budget, and benefits.
-- Dense but readable cards for itinerary items and benefit matches.
+- 40 fixtures.
+- 100% hard-constraint compliance.
+- Zero duplicate execution.
+- Zero autonomous action on conflicting data.
+- At least 95% recovery success when a valid candidate and successful execution path exist.
+- Under two-second engine decision without external latency.
 
-Avoid:
+Browser suite:
 
-- Oversized hero sections.
-- Long text explaining features.
-- Decorative screens before the actual tool.
-- Generic travel stock imagery that does not help the workflow.
+- Seed family.
+- Edit and save policy.
+- Inject disruption.
+- Run recovery.
+- Confirm simulated actions.
+- Display explanations and badges.
+- Populate audit timeline.
+- Reset and repeat.
 
-## Main Technical Risks
+Resilience suite:
 
-### Risk 1: Over-scoping
-
-Travel products naturally expand.
-
-Mitigation:
-
-- Freeze the MVP.
-- Make the demo path the product path.
-- Cut features that do not support the pitch.
-
-### Risk 2: Weak Benefit Data
-
-If benefit suggestions are generic, the Amex angle becomes weak.
-
-Mitigation:
-
-- Create 8 to 12 strong mock benefits.
-- Tie each benefit to a trip trigger.
-- Explain the user action clearly.
-
-### Risk 3: AI Output Quality
-
-AI can produce bland or wrong itineraries.
-
-Mitigation:
-
-- Use structured prompts.
-- Add deterministic fallback data.
-- Keep output editable.
-
-### Risk 4: Demo Fragility
-
-External APIs and auth can fail.
-
-Mitigation:
-
-- Keep a no-network demo path.
-- Use mock data.
-- Test the final flow repeatedly.
-
-## Build Recommendation
-
-Start with a client-side MVP.
-
-Use static data and deterministic generation first. Add AI or backend only after the full product path works.
-
-The best hackathon version is not the most complex one. It is the one that makes the Amex travel value obvious in a working product.
+- No API keys.
+- Supabase unavailable.
+- Gemini failure.
+- Resend failure.
+- Unknown execution state.
+- 390px mobile layout.
 
 ## Final Verdict
 
-Recommended stack:
+The right GStack is:
 
-- Next.js or React.
+- Next.js App Router.
+- React.
+- TypeScript.
 - Tailwind CSS.
-- Static JSON data.
+- shadcn/ui.
+- Lucide.
+- Vitest.
+- Playwright.
 - localStorage.
-- Optional AI generation.
-- Optional Supabase only if persistence or auth becomes necessary.
-- Vercel or Netlify deployment.
+- Optional Supabase.
+- Optional Resend.
+- Gemini for prose only.
+- Optional Amadeus status and search.
+- Vercel deployment.
 
-This gives the team the best chance of shipping a product that can be judged clearly.
+The wrong build is an AI itinerary planner with a few travel cards.
+
+SafarSet wins if the deterministic recovery engine is strict, visible, tested, and boring in the right places.
