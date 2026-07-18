@@ -11,6 +11,7 @@ import type {
 
 export type FlightStatusInput = Readonly<{
   trip: Trip;
+  observedAt: string;
 }>;
 
 export type FlightStatusResult = Readonly<{
@@ -23,6 +24,7 @@ export type AlternativeSearchInput = Readonly<{
   disruption: DisruptionEvent;
   family: FamilyProfile;
   policy: RecoveryPolicy;
+  observedAt: string;
 }>;
 
 export type RebookingInput = Readonly<{

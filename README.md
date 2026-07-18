@@ -151,7 +151,7 @@ Implementation work stays on scoped branches until explicitly approved.
 
 Current implementation branch:
 
-- `codex/spec4-notifications`
+- `codex/spec6-amadeus`
 
 ## Demo Notes
 
@@ -173,6 +173,36 @@ Expected demo flow:
 5. Run safe recovery.
 6. Review confirmations, rejected alternatives, and audit trail.
 7. Reset and repeat.
+8. Open API Truth and verify every capability claim.
+9. Run the 40-scenario evaluation dashboard.
+
+## Architecture at a Glance
+
+```text
+UI and route handlers
+  -> application services
+  -> provider and persistence contracts
+  -> deterministic recovery engine
+  -> domain models
+```
+
+The engine has no React, Next.js, network, storage, environment, clock, or randomness dependency. Optional providers wrap a completed decision and cannot modify it. See [Architecture](./Documentation/ARCHITECTURE.md) for dependency rules.
+
+## Test Commands
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run test:e2e
+```
+
+The Playwright suite completes the no-key hero recovery five consecutive times and checks the truth surface at 390px. GitHub Actions runs the same browser suite after lint, typecheck, unit tests, and production build.
+
+## PWA and Offline Behavior
+
+SafarSet includes an installable manifest and a small offline shell. Recovery evidence remains in browser storage when the network disappears. Provider calls are never required for the deterministic demo flow.
 
 ## Optional Supabase Persistence
 
@@ -207,6 +237,19 @@ Real email delivery is excluded from the normal test suite. Trigger one syntheti
 npm run test:integration:resend
 ```
 
+## Optional Amadeus Enrichment
+
+Demo mode is the default and makes no Amadeus call. To attempt live flight status and alternative search, set these server-only values in `.env.local`:
+
+```bash
+PROVIDER_MODE=live
+AMADEUS_ENVIRONMENT=test
+AMADEUS_API_KEY=
+AMADEUS_API_SECRET=
+```
+
+Missing, stale, conflicting, timed-out, or unusable responses fall back to fixtures. Usable live offers are added beside fixture offers, so they cannot remove the known-valid demo route. Amadeus can enrich status and search only. Ticket, hotel, and transfer execution remain simulated.
+
 ## Safety Rules
 
 - Use synthetic travellers only.
@@ -214,3 +257,12 @@ npm run test:integration:resend
 - Do not claim real ticket, hotel, transfer, or payment execution until commercial provider access exists.
 - Label simulated actions visibly, such as `SIMULATED_REISSUE`.
 - LLMs may write prose only. They must not choose routes, approve spend, or interpret safety rules.
+
+## Limits and Cost
+
+- Flight status and alternative search use fixtures by default, with optional Amadeus enrichment in live mode.
+- Ticket, hotel, transfer, and payment execution are simulated.
+- Transit airports are a user allow-list, not automated visa advice.
+- Supabase, Gemini, and Resend are optional. Free local demo cost is INR 0.
+- Real email delivery may incur provider usage and must use synthetic recipients.
+- No production authentication, payment processing, or real booking execution exists.

@@ -21,7 +21,15 @@ export const initialDemoState: DemoState = {
 };
 
 const initialSnapshot = JSON.stringify(initialDemoState);
-const views = new Set(["benefit", "policy", "trip", "recovery", "audit"]);
+const views = new Set([
+  "benefit",
+  "policy",
+  "trip",
+  "recovery",
+  "audit",
+  "truth",
+  "evaluation",
+]);
 const phases = new Set([
   "ready",
   "disrupted",

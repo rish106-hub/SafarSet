@@ -31,7 +31,15 @@ export function AuditPanel({
 
       <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
         <ol className="border border-white/10 bg-[#0b1928]">
-          {events.map((event, index) => (
+          {events.length === 0 ? (
+            <li className="grid min-h-64 place-items-center p-8 text-center">
+              <div>
+                <FileClock className="mx-auto size-6 text-slate-600" />
+                <p className="mt-4 text-sm font-medium text-white">No recovery evidence yet</p>
+                <p className="mt-2 text-xs leading-5 text-slate-500">Inject a disruption and run recovery to create the audit trail.</p>
+              </div>
+            </li>
+          ) : events.map((event, index) => (
             <li key={`${event.id}-${index}`} className="grid gap-3 border-b border-white/8 p-5 last:border-0 sm:grid-cols-[100px_24px_1fr]">
               <time className="font-mono text-[10px] text-slate-600">{formatTime(event.at)}</time>
               <CheckCircle2 className="size-5 text-[#67d8ef]" />

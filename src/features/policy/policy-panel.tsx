@@ -63,6 +63,7 @@ export function PolicyPanel({
           <CardContent className="grid gap-6 sm:grid-cols-2">
             <Field label="Automatic spend limit" hint="INR">
               <Input
+                aria-label="Automatic spend limit"
                 type="number"
                 min={0}
                 value={policy.autoSpendLimit.amountMinor / 100}
@@ -81,6 +82,7 @@ export function PolicyPanel({
             </Field>
             <Field label="Minimum connection" hint="minutes">
               <Input
+                aria-label="Minimum connection"
                 type="number"
                 min={60}
                 step={15}

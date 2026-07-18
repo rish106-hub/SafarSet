@@ -87,6 +87,8 @@
 
   html {
     @apply bg-background font-sans;
+    min-width: 320px;
+    overflow-x: hidden;
   }
 
   body {
@@ -94,6 +96,7 @@
     background-image:
       radial-gradient(circle at 88% 0%, rgb(103 216 239 / 0.08), transparent 25rem),
       linear-gradient(180deg, #071321 0%, #06101c 36rem);
+    overflow-x: hidden;
   }
 
   button:not(:disabled),

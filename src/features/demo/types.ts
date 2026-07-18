@@ -2,7 +2,14 @@ import type { DemoAuditEvent, DemoRecoveryResult } from "@/application/services/
 import type { RecoveryPolicy, SourceMode } from "@/domain";
 import type { PersistenceMode } from "@/persistence/contracts/recovery-repository";
 
-export type DemoView = "benefit" | "policy" | "trip" | "recovery" | "audit";
+export type DemoView =
+  | "benefit"
+  | "policy"
+  | "trip"
+  | "recovery"
+  | "audit"
+  | "truth"
+  | "evaluation";
 export type DemoPhase =
   | "ready"
   | "disrupted"

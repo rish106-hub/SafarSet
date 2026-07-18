@@ -19,21 +19,36 @@ class MemoryStorage implements StoragePort {
   private readonly values = new Map<string, string>();
   getItem(key: string) { return this.values.get(key) ?? null; }
   setItem(key: string, value: string) { this.values.set(key, value); }
+  removeItem(key: string) { this.values.delete(key); }
 }
 
 class FakeRepository implements RecoveryRepository {
   saved: RecoveryEvidence | null = null;
+  private cleared = false;
   constructor(
     private readonly stored: RecoveryEvidence | null = null,
     private readonly fails = false,
   ) {}
-  async load() {
+  async load(tripId: string) {
+    void tripId;
     if (this.fails) throw new Error("offline");
+    if (this.cleared) return null;
     return this.saved ?? this.stored;
   }
   async save(evidence: RecoveryEvidence) {
     if (this.fails) throw new Error("offline");
+    this.cleared = false;
     this.saved = evidence;
+  }
+  async clear(tripId: string) {
+    void tripId;
+    if (this.fails) throw new Error("offline");
+    this.cleared = true;
+    this.saved = null;
+  }
+  async wasCleared(tripId: string) {
+    void tripId;
+    return this.cleared;
   }
 }
 
@@ -101,5 +116,16 @@ describe("recovery persistence", () => {
     const repository = new FallbackRecoveryRepository(remote, new FakeRepository(localNew));
     await expect(repository.load(HERO_TRIP_ID)).resolves.toEqual({ evidence: localNew, mode: "SUPABASE" });
     expect(remote.saved).toEqual(localNew);
+  });
+
+  it("clears local evidence even when Supabase is unavailable", async () => {
+    const evidence = await createEvidence();
+    const local = new FakeRepository(evidence);
+    const repository = new FallbackRecoveryRepository(
+      new FakeRepository(null, true),
+      local,
+    );
+    await expect(repository.clear(HERO_TRIP_ID)).resolves.toBeUndefined();
+    await expect(local.load(HERO_TRIP_ID)).resolves.toBeNull();
   });
 });

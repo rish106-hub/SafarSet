@@ -11,10 +11,12 @@ import {
 } from "@/domain";
 import { createHeroTrip, fixtureMetadata, HERO_NOW } from "@/data";
 import { AuditPanel } from "@/features/audit/audit-panel";
+import { EvaluationPanel } from "@/features/evaluation/evaluation-panel";
 import { BenefitEntry } from "@/features/landing/benefit-entry";
 import { PolicyPanel } from "@/features/policy/policy-panel";
 import { RecoveryPanel } from "@/features/recovery/recovery-panel";
 import { TripPanel } from "@/features/trip/trip-panel";
+import { TruthPanel } from "@/features/truth/truth-panel";
 import { getRecoveryRepository } from "@/persistence/client";
 import {
   HERO_TRIP_ID,
@@ -22,6 +24,8 @@ import {
   type RecoveryEvidence,
 } from "@/persistence/contracts/recovery-repository";
 import { requestRecoveryCommunication } from "@/providers/client/communication";
+import { createLiveFallbackTravelProvider } from "@/providers/client/travel";
+import { demoTravelProvider } from "@/providers/demo";
 
 import {
   disruptionTimelineItem,
@@ -65,6 +69,10 @@ const analysisSteps: readonly Omit<RecoveryTimelineItem, "status">[] = [
 export function stepsForResult(
   result: NonNullable<DemoState["result"]>,
 ): readonly Omit<RecoveryTimelineItem, "status">[] {
+  const sourceMode =
+    result.decision.rankedCandidates[0]?.candidate.provider.mode ??
+    result.decision.evaluations[0]?.candidate.provider.mode ??
+    SourceMode.Fixture;
   const steps = analysisSteps.filter((step) => {
     if (step.id === "timeline-rejections") {
       return result.decision.evaluations.some((evaluation) => !evaluation.passed);
@@ -73,27 +81,27 @@ export function stepsForResult(
       return result.decision.rankedCandidates.length > 0;
     }
     return true;
-  });
+  }).map((step) => ({ ...step, mode: sourceMode }));
   const decisionStep: Omit<RecoveryTimelineItem, "status"> =
     result.decision.outcome === DecisionOutcome.AutoBook
       ? {
           id: "timeline-decision",
           label: "Autonomy approved",
           detail: "Selected route stays inside every hard rule and spend limit.",
-          mode: SourceMode.Fixture,
+          mode: sourceMode,
         }
       : result.decision.outcome === DecisionOutcome.RequestApproval
         ? {
             id: "timeline-decision",
             label: "Approval required",
             detail: result.decision.reason,
-            mode: SourceMode.Fixture,
+            mode: sourceMode,
           }
         : {
             id: "timeline-decision",
             label: "Human escalation required",
             detail: result.decision.reason,
-            mode: SourceMode.Fixture,
+            mode: sourceMode,
           };
   const hasExecution = result.actions.some(
     (action) => action.id !== "action-notification",
@@ -131,7 +139,7 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
-export function DemoWorkspace() {
+export function DemoWorkspace({ providerMode }: Readonly<{ providerMode: "demo" | "live" }>) {
   const snapshot = useSyncExternalStore(
     subscribeDemoState,
     getDemoSnapshot,
@@ -140,6 +148,10 @@ export function DemoWorkspace() {
   const state = useMemo(() => parseDemoState(snapshot), [snapshot]);
   const runningRef = useRef(false);
   const runGenerationRef = useRef(0);
+  const travelProvider = useMemo(
+    () => providerMode === "live" ? createLiveFallbackTravelProvider() : demoTravelProvider,
+    [providerMode],
+  );
 
   const deliverCommunication = (
     evidence: RecoveryEvidence,
@@ -293,6 +305,7 @@ export function DemoWorkspace() {
           const result = await runDemoRecovery({
             policy: reserved.policy,
             usedIdempotencyKeys: new Set(reserved.usedIdempotencyKeys),
+            travelProvider,
           });
           if (!isCurrent()) return;
           const reducedMotion = window.matchMedia(
@@ -415,6 +428,7 @@ export function DemoWorkspace() {
     runGenerationRef.current += 1;
     runningRef.current = false;
     resetDemoState();
+    void getRecoveryRepository().clear(HERO_TRIP_ID);
   };
 
   if (state.view === "benefit") {
@@ -436,6 +450,7 @@ export function DemoWorkspace() {
           onPolicyChange={updatePolicy}
           onInject={injectDisruption}
           onRun={runRecovery}
+          providerMode={providerMode}
         />
       </main>
     </div>
@@ -448,12 +463,14 @@ function View({
   onPolicyChange,
   onInject,
   onRun,
+  providerMode,
 }: Readonly<{
   state: DemoState;
   onNavigate: (view: DemoView) => void;
   onPolicyChange: (policy: RecoveryPolicy) => void;
   onInject: () => void;
   onRun: () => void;
+  providerMode: "demo" | "live";
 }>) {
   switch (state.view) {
     case "policy":
@@ -474,6 +491,7 @@ function View({
           candidate={selectedCandidate}
           onInject={onInject}
           onOpenRecovery={() => onNavigate("recovery")}
+          providerMode={providerMode}
         />
       );
     case "recovery":
@@ -492,6 +510,15 @@ function View({
           onBack={() => onNavigate("recovery")}
         />
       );
+    case "truth":
+      return (
+        <TruthPanel
+          persistenceMode={state.persistenceMode}
+          onOpenEvaluation={() => onNavigate("evaluation")}
+        />
+      );
+    case "evaluation":
+      return <EvaluationPanel />;
     default:
       return null;
   }
