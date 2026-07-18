@@ -27,6 +27,7 @@ Supporting docs:
 - [Stage Specs](./Documentation/specs/)
 - [Contribution Guidelines](./CONTRIBUTING.md)
 - [Security Policy](./SECURITY.md)
+- [Main Branch Ruleset](./.github/rulesets/README.md)
 
 ## Main Branch Scope
 
@@ -35,6 +36,8 @@ Supporting docs:
 It contains product direction, planning docs, contribution rules, safety policy, issue templates, PR templates, labels, and repo automation.
 
 Implementation code stays on scoped branches until explicitly approved.
+
+`main` is intended to be protected by the [main branch ruleset](./.github/rulesets/main-branch-protection.json).
 
 Current implementation branch:
 
