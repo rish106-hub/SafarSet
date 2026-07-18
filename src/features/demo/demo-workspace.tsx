@@ -21,6 +21,7 @@ import {
   PERSISTENCE_VERSION,
   type RecoveryEvidence,
 } from "@/persistence/contracts/recovery-repository";
+import { requestRecoveryCommunication } from "@/providers/client/communication";
 
 import {
   disruptionTimelineItem,
@@ -139,6 +140,83 @@ export function DemoWorkspace() {
   const state = useMemo(() => parseDemoState(snapshot), [snapshot]);
   const runningRef = useRef(false);
   const runGenerationRef = useRef(0);
+
+  const deliverCommunication = (
+    evidence: RecoveryEvidence,
+    generation: number,
+  ) => {
+    void requestRecoveryCommunication(evidence)
+      .then(async (report) => {
+        if (generation !== runGenerationRef.current) return;
+        const current = parseDemoState(getDemoSnapshot());
+        if (current.result?.decision.idempotencyKey !== evidence.run.id) return;
+        const communicationAudit = [
+          {
+            id: "audit-prose-delivery",
+            at: report.proseProvider.observedAt,
+            label: "Prose delivery checked",
+            detail: `Gemini: ${report.proseStatus}. Deterministic copy remained available.`,
+            provider: report.proseProvider,
+          },
+          {
+            id: "audit-email-delivery",
+            at: report.emailProvider.observedAt,
+            label: "Email delivery checked",
+            detail: `Resend: ${report.emailStatus}. In-app confirmation was not affected.`,
+            provider: report.emailProvider,
+          },
+        ] as const;
+        updateDemoState((latest) =>
+          latest.result?.decision.idempotencyKey === evidence.run.id
+            ? { ...latest, audit: [...latest.audit, ...communicationAudit] }
+            : latest,
+        );
+        const updated = parseDemoState(getDemoSnapshot());
+        if (updated.result?.decision.idempotencyKey !== evidence.run.id) return;
+        await getRecoveryRepository().save({
+          ...evidence,
+          audit: updated.audit,
+          uiState: updated,
+          updatedAt: new Date().toISOString(),
+        });
+      })
+      .catch(async () => {
+        if (generation !== runGenerationRef.current) return;
+        const now = new Date().toISOString();
+        updateDemoState((current) =>
+          current.result?.decision.idempotencyKey === evidence.run.id
+            ? {
+                ...current,
+                audit: [
+                  ...current.audit,
+                  {
+                    id: "audit-communication-fallback",
+                    at: now,
+                    label: "External communication unavailable",
+                    detail:
+                      "Deterministic in-app confirmation remained available.",
+                    provider: {
+                      source: "SafarSet communication fallback",
+                      mode: SourceMode.Unavailable,
+                      isSimulated: false,
+                      observedAt: now,
+                      confidence: 0,
+                    },
+                  },
+                ],
+              }
+            : current,
+        );
+        const updated = parseDemoState(getDemoSnapshot());
+        if (updated.result?.decision.idempotencyKey !== evidence.run.id) return;
+        await getRecoveryRepository().save({
+          ...evidence,
+          audit: updated.audit,
+          uiState: updated,
+          updatedAt: now,
+        });
+      });
+  };
 
   useEffect(() => {
     let active = true;
@@ -303,6 +381,7 @@ export function DemoWorkspace() {
                 ? { ...current, persistenceMode: mode }
                 : current,
             );
+            deliverCommunication(evidence, generation);
           }
         } catch (error) {
           if (!isCurrent()) return;

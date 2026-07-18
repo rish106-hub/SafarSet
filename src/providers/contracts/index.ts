@@ -100,3 +100,26 @@ export interface NotificationProvider {
     input: RecoveryMessage,
   ): Promise<NotificationResult>;
 }
+
+export type CompletedRecoveryFacts = Readonly<{
+  recoveryRunId: string;
+  route: readonly string[];
+  arrivalAt: string;
+  actionLabels: readonly string[];
+}>;
+
+export type ProseRequest = Readonly<{
+  facts: CompletedRecoveryFacts;
+  deterministicBody: string;
+  observedAt: string;
+}>;
+
+export type ProseResult = Readonly<{
+  accepted: boolean;
+  body: string | null;
+  provider: ProviderMetadata;
+}>;
+
+export interface ProseProvider {
+  rewriteCompletedRecovery(input: ProseRequest): Promise<ProseResult>;
+}

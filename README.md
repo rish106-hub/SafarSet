@@ -151,7 +151,7 @@ Implementation work stays on scoped branches until explicitly approved.
 
 Current implementation branch:
 
-- `codex/spec3-persistence`
+- `codex/spec4-notifications`
 
 ## Demo Notes
 
@@ -185,6 +185,27 @@ npx supabase db push
 ```
 
 Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`. The service role key is server-only. Never add `NEXT_PUBLIC_` to it.
+
+## Optional Recovery Communication
+
+The app always creates deterministic in-app confirmation. Gemini may rewrite the completed message, and Resend may deliver it by email. Neither service can select a route or change policy decisions.
+
+Set any needed values in `.env.local`:
+
+```bash
+GEMINI_API_KEY=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
+RESEND_TO_EMAIL=
+```
+
+If any value is missing or either provider fails, recovery still finishes and the audit records the fallback.
+
+Real email delivery is excluded from the normal test suite. Trigger one synthetic delivery manually with:
+
+```bash
+npm run test:integration:resend
+```
 
 ## Safety Rules
 
