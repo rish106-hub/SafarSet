@@ -1,5 +1,6 @@
 import type { DemoAuditEvent, DemoRecoveryResult } from "@/application/services/run-demo-recovery";
 import type { RecoveryPolicy, SourceMode } from "@/domain";
+import type { PersistenceMode } from "@/persistence/contracts/recovery-repository";
 
 export type DemoView = "benefit" | "policy" | "trip" | "recovery" | "audit";
 export type DemoPhase = "ready" | "disrupted" | "running" | "recovered" | "error";
@@ -22,4 +23,5 @@ export type DemoState = Readonly<{
   audit: readonly DemoAuditEvent[];
   usedIdempotencyKeys: readonly string[];
   error: string | null;
+  persistenceMode: PersistenceMode;
 }>;

@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { SourceBadge } from "@/components/source-badge";
 import type { DemoAuditEvent } from "@/application/services/run-demo-recovery";
 import { formatTime } from "@/lib/format";
+import type { PersistenceMode } from "@/persistence/contracts/recovery-repository";
 
 export function AuditPanel({
   events,
+  persistenceMode,
   onBack,
 }: Readonly<{
   events: readonly DemoAuditEvent[];
+  persistenceMode: PersistenceMode;
   onBack: () => void;
 }>) {
   return (
@@ -46,9 +49,13 @@ export function AuditPanel({
 
         <aside className="h-fit border border-[#67d8ef]/20 bg-[#67d8ef]/5 p-5">
           <FileClock className="size-5 text-[#8edff0]" />
-          <p className="mt-4 text-sm font-medium text-white">Local audit active</p>
+          <p className="mt-4 text-sm font-medium text-white">
+            {persistenceMode === "SUPABASE" ? "Supabase audit active" : "Local audit active"}
+          </p>
           <p className="mt-2 text-xs leading-5 text-slate-500">
-            Stored in this browser only. Supabase persistence arrives in Spec 03.
+            {persistenceMode === "SUPABASE"
+              ? "Stored remotely and mirrored in this browser."
+              : "Stored in this browser. Remote failure cannot block recovery."}
           </p>
           <dl className="mt-5 space-y-3 border-t border-white/8 pt-4 text-xs">
             <div className="flex justify-between gap-3">
@@ -57,7 +64,7 @@ export function AuditPanel({
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-slate-500">External calls</dt>
-              <dd className="font-mono text-white">0</dd>
+              <dd className="font-mono text-white">{persistenceMode === "SUPABASE" ? "2" : "0"}</dd>
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-slate-500">Real transactions</dt>

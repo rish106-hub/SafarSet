@@ -157,6 +157,13 @@ Current implementation branch:
 
 Current implementation branches may include a local demo.
 
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). No external credentials are required.
+
 Expected demo flow:
 
 1. Review protected trip benefit.
@@ -166,6 +173,18 @@ Expected demo flow:
 5. Run safe recovery.
 6. Review confirmations, rejected alternatives, and audit trail.
 7. Reset and repeat.
+
+## Optional Supabase Persistence
+
+Spec 3 mirrors complete recovery evidence to Supabase when server credentials exist. Local storage is written first, so a missing or failed Supabase connection does not block recovery.
+
+```bash
+cp .env.example .env.local
+npx supabase link --project-ref <project-ref>
+npx supabase db push
+```
+
+Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`. The service role key is server-only. Never add `NEXT_PUBLIC_` to it.
 
 ## Safety Rules
 
