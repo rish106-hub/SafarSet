@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Activity,
   ClipboardCheck,
@@ -50,7 +51,8 @@ function NavItems({ view, phase, onNavigate, onReset }: WorkspaceNavProps) {
           const Icon = item.icon;
           const disabled =
             (item.id === "recovery" && phase === "ready") ||
-            (item.id === "audit" && phase !== "recovered");
+            (item.id === "audit" &&
+              !["recovered", "awaiting-approval", "escalated"].includes(phase));
           return (
             <button
               key={item.id}
@@ -84,6 +86,19 @@ function NavItems({ view, phase, onNavigate, onReset }: WorkspaceNavProps) {
 }
 
 export function WorkspaceNav(props: WorkspaceNavProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileProps: WorkspaceNavProps = {
+    ...props,
+    onNavigate: (view) => {
+      props.onNavigate(view);
+      setMobileOpen(false);
+    },
+    onReset: () => {
+      props.onReset();
+      setMobileOpen(false);
+    },
+  };
+
   return (
     <>
       <aside className="hidden min-h-screen w-60 shrink-0 border-r border-white/10 bg-[#07101c]/95 p-4 lg:flex lg:flex-col">
@@ -108,7 +123,7 @@ export function WorkspaceNav(props: WorkspaceNavProps) {
           </div>
           <span className="font-semibold text-white">SafarSet</span>
         </div>
-        <Sheet>
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger
             render={
               <Button variant="ghost" size="icon" aria-label="Open navigation" />
@@ -124,7 +139,7 @@ export function WorkspaceNav(props: WorkspaceNavProps) {
               </SheetDescription>
             </SheetHeader>
             <div className="mt-6 flex h-[calc(100%-6rem)] flex-col">
-              <NavItems {...props} />
+              <NavItems {...mobileProps} />
             </div>
           </SheetContent>
         </Sheet>

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CabinClass, type RecoveryPolicy } from "@/domain";
-import { formatMoney, toDateTimeLocal } from "@/lib/format";
+import { formatMoney, fromDateTimeLocal, toDateTimeLocal } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const airportOptions = ["DXB", "DOH", "IST", "AUH", "FRA"] as const;
@@ -70,7 +70,10 @@ export function PolicyPanel({
                   update({
                     autoSpendLimit: {
                       currency: "INR",
-                      amountMinor: Math.max(0, Number(event.target.value) * 100),
+                      amountMinor: Math.max(
+                        0,
+                        Math.round(Number(event.target.value) * 100),
+                      ),
                     },
                   })
                 }
@@ -97,9 +100,15 @@ export function PolicyPanel({
                 type="number"
                 min={0}
                 max={2}
+                step={1}
                 value={policy.maxStops}
                 onChange={(event) =>
-                  update({ maxStops: Math.max(0, Number(event.target.value)) })
+                  update({
+                    maxStops: Math.min(
+                      2,
+                      Math.max(0, Math.floor(Number(event.target.value))),
+                    ),
+                  })
                 }
               />
             </Field>
@@ -122,18 +131,13 @@ export function PolicyPanel({
                 </option>
               </select>
             </Field>
-            <Field label="Home arrival deadline" hint="UTC">
+            <Field label="Home arrival deadline" hint="local time">
               <Input
                 type="datetime-local"
                 value={toDateTimeLocal(policy.arrivalDeadline)}
                 onChange={(event) => {
-                  if (event.target.value) {
-                    update({
-                      arrivalDeadline: new Date(
-                        `${event.target.value}:00.000Z`,
-                      ).toISOString(),
-                    });
-                  }
+                  const arrivalDeadline = fromDateTimeLocal(event.target.value);
+                  if (arrivalDeadline) update({ arrivalDeadline });
                 }}
               />
             </Field>

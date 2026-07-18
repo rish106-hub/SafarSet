@@ -1,6 +1,10 @@
-import { runDemoRecovery } from "@/application/services/run-demo-recovery";
+import {
+  getOvernightStayWindow,
+  runDemoRecovery,
+} from "@/application/services/run-demo-recovery";
 import { DecisionOutcome, SourceMode } from "@/domain";
-import { heroPolicy } from "@/data";
+import { createCandidate, heroPolicy } from "@/data";
+import { stepsForResult } from "@/features/demo/demo-workspace";
 import { describe, expect, it } from "vitest";
 
 describe("runDemoRecovery", () => {
@@ -36,6 +40,19 @@ describe("runDemoRecovery", () => {
 
     expect(result.decision.outcome).toBe(DecisionOutcome.RequestApproval);
     expect(result.actions).toHaveLength(0);
+    const labels = stepsForResult(result).map((step) => step.label);
+    expect(labels).toContain("Approval required");
+    expect(labels).not.toContain("Autonomy approved");
+    expect(labels).not.toContain("Recovery actions simulated");
+    expect(labels).not.toContain("Family confirmation logged");
+  });
+
+  it("derives the overnight stay from the selected connection window", () => {
+    const candidate = createCandidate({ requiresOvernight: true });
+    expect(getOvernightStayWindow(candidate)).toEqual({
+      checkIn: candidate.segments[0]?.estimatedArrival,
+      checkOut: candidate.segments[1]?.estimatedDeparture,
+    });
   });
 
   it("blocks a second execution with caller-owned key", async () => {

@@ -2,7 +2,7 @@ import { AlertTriangle, ArrowRight, BriefcaseBusiness, Clock3, Users } from "luc
 
 import { Button } from "@/components/ui/button";
 import { SourceBadge } from "@/components/source-badge";
-import { SourceMode } from "@/domain";
+import { SourceMode, type RecoveryCandidate } from "@/domain";
 import { heroFamily, heroTrip } from "@/data";
 import type { DemoPhase } from "@/features/demo/types";
 import { RouteRibbon } from "@/features/recovery/route-ribbon";
@@ -10,10 +10,12 @@ import { formatTime } from "@/lib/format";
 
 export function TripPanel({
   phase,
+  candidate,
   onInject,
   onOpenRecovery,
 }: Readonly<{
   phase: DemoPhase;
+  candidate?: RecoveryCandidate;
   onInject: () => void;
   onOpenRecovery: () => void;
 }>) {
@@ -44,7 +46,7 @@ export function TripPanel({
         </div>
       </header>
 
-      <RouteRibbon phase={phase} />
+      <RouteRibbon phase={phase} candidate={candidate} />
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
         <section className="border border-white/10 bg-[#0b1928]">

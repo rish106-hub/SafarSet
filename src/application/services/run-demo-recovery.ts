@@ -2,6 +2,7 @@ import {
   DecisionOutcome,
   type ProviderMetadata,
   type RecoveryDecision,
+  type RecoveryCandidate,
   type RecoveryPolicy,
 } from "@/domain";
 import {
@@ -39,6 +40,23 @@ export type DemoRecoveryResult = Readonly<{
   actions: readonly DemoActionResult[];
   audit: readonly DemoAuditEvent[];
 }>;
+
+export function getOvernightStayWindow(candidate: RecoveryCandidate): Readonly<{
+  checkIn: string;
+  checkOut: string;
+}> | null {
+  let longest: { checkIn: string; checkOut: string; duration: number } | null = null;
+  for (let index = 0; index < candidate.segments.length - 1; index += 1) {
+    const checkIn = candidate.segments[index]?.estimatedArrival;
+    const checkOut = candidate.segments[index + 1]?.estimatedDeparture;
+    if (!checkIn || !checkOut) continue;
+    const duration = Date.parse(checkOut) - Date.parse(checkIn);
+    if (duration > 0 && (!longest || duration > longest.duration)) {
+      longest = { checkIn, checkOut, duration };
+    }
+  }
+  return longest ? { checkIn: longest.checkIn, checkOut: longest.checkOut } : null;
+}
 
 export async function runDemoRecovery(input: {
   policy: RecoveryPolicy;
@@ -122,10 +140,12 @@ export async function runDemoRecovery(input: {
   ];
 
   if (selected.requiresOvernight) {
+    const stayWindow = getOvernightStayWindow(selected);
+    if (!stayWindow) throw new Error("Overnight recovery route has no valid stay window.");
     const stay = await demoAccommodationProvider.modifyStay({
       tripId: trip.id,
-      checkIn: "2026-08-14T23:30:00.000Z",
-      checkOut: "2026-08-15T03:30:00.000Z",
+      checkIn: stayWindow.checkIn,
+      checkOut: stayWindow.checkOut,
       maximumCost: { currency: "INR", amountMinor: 120_000 },
       idempotencyKey: `${decision.idempotencyKey}-stay`,
     });

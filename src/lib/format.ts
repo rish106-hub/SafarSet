@@ -9,6 +9,8 @@ export function formatMoney(money: Money): string {
 }
 
 export function formatTime(value: string): string {
+  const date = new Date(value);
+  if (!value || Number.isNaN(date.getTime())) return "Time unavailable";
   return new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
     month: "short",
@@ -16,9 +18,17 @@ export function formatTime(value: string): string {
     minute: "2-digit",
     hour12: false,
     timeZone: "UTC",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 export function toDateTimeLocal(value: string): string {
-  return value.slice(0, 16);
+  const date = new Date(value);
+  if (!value || Number.isNaN(date.getTime())) return "";
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function fromDateTimeLocal(value: string): string | null {
+  const date = new Date(value);
+  return value && !Number.isNaN(date.getTime()) ? date.toISOString() : null;
 }

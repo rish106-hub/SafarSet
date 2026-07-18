@@ -34,7 +34,14 @@ export type PersistedRecoveryResult = Readonly<{
 export type PersistedUiState = Readonly<{
   version: 1;
   view: "benefit" | "policy" | "trip" | "recovery" | "audit";
-  phase: "ready" | "disrupted" | "running" | "recovered" | "error";
+  phase:
+    | "ready"
+    | "disrupted"
+    | "running"
+    | "recovered"
+    | "awaiting-approval"
+    | "escalated"
+    | "error";
   policy: RecoveryPolicy;
   timeline: readonly Readonly<{
     id: string;
@@ -46,6 +53,7 @@ export type PersistedUiState = Readonly<{
   result: PersistedRecoveryResult | null;
   audit: readonly PersistedAuditEvent[];
   usedIdempotencyKeys: readonly string[];
+  activeRunId: string | null;
   error: string | null;
   persistenceMode: PersistenceMode;
 }>;

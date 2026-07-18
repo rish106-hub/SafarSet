@@ -20,6 +20,22 @@ describe("demo browser state", () => {
         }),
       ),
     ).toEqual(initialDemoState);
+    expect(
+      parseDemoState(
+        JSON.stringify({
+          ...initialDemoState,
+          policy: { ...initialDemoState.policy, maxStops: 9 },
+        }),
+      ),
+    ).toEqual(initialDemoState);
+    expect(
+      parseDemoState(
+        JSON.stringify({
+          ...initialDemoState,
+          audit: [{ id: "broken" }],
+        }),
+      ),
+    ).toEqual(initialDemoState);
   });
 
   it("restores valid versioned state", () => {

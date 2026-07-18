@@ -3,7 +3,16 @@ import type { RecoveryPolicy, SourceMode } from "@/domain";
 import type { PersistenceMode } from "@/persistence/contracts/recovery-repository";
 
 export type DemoView = "benefit" | "policy" | "trip" | "recovery" | "audit";
-export type DemoPhase = "ready" | "disrupted" | "running" | "recovered" | "error";
+export type DemoPhase =
+  | "ready"
+  | "disrupted"
+  | "running"
+  | "recovered"
+  | "awaiting-approval"
+  | "escalated"
+  | "error";
+
+export const MAX_RECOVERY_TIMELINE_ITEMS = 8;
 
 export type RecoveryTimelineItem = Readonly<{
   id: string;
@@ -22,6 +31,7 @@ export type DemoState = Readonly<{
   result: DemoRecoveryResult | null;
   audit: readonly DemoAuditEvent[];
   usedIdempotencyKeys: readonly string[];
+  activeRunId: string | null;
   error: string | null;
   persistenceMode: PersistenceMode;
 }>;

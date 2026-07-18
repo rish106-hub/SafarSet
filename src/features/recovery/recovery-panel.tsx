@@ -15,7 +15,10 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SourceBadge } from "@/components/source-badge";
 import { DecisionOutcome, type CandidateEvaluation } from "@/domain";
-import type { DemoState } from "@/features/demo/types";
+import {
+  MAX_RECOVERY_TIMELINE_ITEMS,
+  type DemoState,
+} from "@/features/demo/types";
 import { formatMoney, formatTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -34,11 +37,19 @@ export function RecoveryPanel({
   const selected = decision?.rankedCandidates.find(
     (item) => item.candidate.id === decision.selectedCandidateId,
   )?.candidate;
+  const decisionComplete = ["recovered", "awaiting-approval", "escalated"].includes(
+    state.phase,
+  );
   const progress =
-    state.phase === "recovered"
+    decisionComplete
       ? 100
       : state.phase === "running"
-        ? Math.min(92, 12 + state.timeline.length * 12)
+        ? Math.min(
+            95,
+            Math.round(
+              (state.timeline.length / MAX_RECOVERY_TIMELINE_ITEMS) * 100,
+            ),
+          )
         : state.phase === "disrupted"
           ? 8
           : 0;
@@ -61,6 +72,14 @@ export function RecoveryPanel({
           {state.phase === "recovered" ? (
             <Badge className="rounded-sm bg-[#67d8ef] text-slate-950">
               RECOVERY COMPLETE
+            </Badge>
+          ) : state.phase === "awaiting-approval" ? (
+            <Badge className="rounded-sm bg-[#f5a524] text-slate-950">
+              APPROVAL REQUIRED
+            </Badge>
+          ) : state.phase === "escalated" ? (
+            <Badge className="rounded-sm bg-[#ff7452] text-white">
+              ESCALATED
             </Badge>
           ) : (
             <Badge className="rounded-sm bg-[#ff7452] text-white">
@@ -164,9 +183,12 @@ export function RecoveryPanel({
 
           {selected && (
             <div className="border border-[#67d8ef]/25 bg-[#67d8ef]/5 p-5">
-              <p className="font-mono text-[10px] tracking-[0.16em] text-[#8edff0]">
-                SELECTED ROUTE
-              </p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-mono text-[10px] tracking-[0.16em] text-[#8edff0]">
+                  SELECTED ROUTE
+                </p>
+                <SourceBadge mode={selected.provider.mode} />
+              </div>
               <div className="mt-4 flex items-end justify-between gap-4">
                 <div>
                   <p className="font-mono text-xl text-white">
@@ -188,9 +210,9 @@ export function RecoveryPanel({
         </aside>
       </div>
 
-      {state.phase === "recovered" && state.result && (
+      {decisionComplete && state.result && (
         <div className="mt-6 space-y-6">
-          <section>
+          {state.result.actions.length > 0 && <section>
             <div className="mb-3 flex items-end justify-between gap-4">
               <div>
                 <p className="font-mono text-[10px] tracking-[0.16em] text-slate-500">CONFIRMED ACTIONS</p>
@@ -210,7 +232,7 @@ export function RecoveryPanel({
                 </article>
               ))}
             </div>
-          </section>
+          </section>}
 
           <section className="border border-white/10 bg-[#0b1928] p-5 sm:p-6">
             <Tabs defaultValue="selected">
@@ -279,17 +301,20 @@ function CandidateChecks({ evaluation }: Readonly<{ evaluation: CandidateEvaluat
           <p className="font-mono text-sm text-white">{route}</p>
           <p className="mt-1 font-mono text-[10px] text-slate-600">{evaluation.candidate.id}</p>
         </div>
-        <Badge
-          variant="outline"
-          className={cn(
-            "rounded-sm",
-            evaluation.passed
-              ? "border-[#67d8ef]/35 text-[#9be8f7]"
-              : "border-[#ff7452]/35 text-[#ff9a82]",
-          )}
-        >
-          {evaluation.passed ? "ELIGIBLE" : "REJECTED"}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <SourceBadge mode={evaluation.candidate.provider.mode} />
+          <Badge
+            variant="outline"
+            className={cn(
+              "rounded-sm",
+              evaluation.passed
+                ? "border-[#67d8ef]/35 text-[#9be8f7]"
+                : "border-[#ff7452]/35 text-[#ff9a82]",
+            )}
+          >
+            {evaluation.passed ? "ELIGIBLE" : "REJECTED"}
+          </Badge>
+        </div>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {evaluation.checks.map((check) => (
