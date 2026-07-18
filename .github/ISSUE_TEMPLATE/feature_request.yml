@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a scoped improvement.
+title: "Feature: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or repo problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope guard
+      description: What should this not include?
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety checks
+      options:
+        - label: This keeps demo mode usable without API keys.
+        - label: This does not let an LLM make recovery decisions.
+        - label: This does not require real ticket, hotel, transfer, or payment execution.

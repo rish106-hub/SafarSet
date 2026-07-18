@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: SafarSet plan
+    url: https://github.com/rish106-hub/SafarSet/blob/main/PLAN.md
+    about: Read the locked build plan before opening broad scope requests.

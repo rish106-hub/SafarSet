@@ -1,0 +1,56 @@
+name: Repo Labels
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/repo-labels.yml"
+
+permissions:
+  issues: write
+
+jobs:
+  sync-labels:
+    name: Sync repository labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = [
+              ["bug", "d73a4a", "Something is broken."],
+              ["enhancement", "a2eeef", "New feature or improvement."],
+              ["documentation", "0075ca", "Documentation-only change."],
+              ["needs-triage", "ededed", "Needs owner review."],
+              ["engine", "5319e7", "Recovery engine, constraints, ranking, autonomy, or idempotency."],
+              ["domain", "1d76db", "Domain models and shared types."],
+              ["providers", "fbca04", "External provider interfaces or adapters."],
+              ["ui", "c5def5", "User interface change."],
+              ["ci", "0e8a16", "GitHub Actions, checks, or repo automation."],
+              ["dependencies", "0366d6", "Dependency or lockfile change."],
+              ["safety-critical", "b60205", "Affects autonomous decisions, constraints, or execution safety."],
+              ["demo-mode", "bfdadc", "Affects no-key deterministic demo behavior."]
+            ];
+
+            for (const [name, color, description] of labels) {
+              try {
+                await github.rest.issues.updateLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                  color,
+                  description
+                });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                  color,
+                  description
+                });
+              }
+            }

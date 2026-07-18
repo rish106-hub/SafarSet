@@ -1,0 +1,49 @@
+name: PR Hygiene
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    name: Apply area labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Label changed areas
+        uses: actions/labeler@v6
+
+  validate-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title.trim();
+            const allowed = /^(Add|Update|Fix|Remove|Document|Refactor|Test|Implement|Configure) .+/;
+            if (!allowed.test(title)) {
+              core.setFailed(`Use a clear imperative PR title. Example: "Add recovery constraint fixtures". Current title: "${title}"`);
+            }
+
+  validate-template:
+    name: Validate PR body
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check body sections
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || "";
+            const required = ["## Summary", "## Why", "## Changes", "## Safety Impact", "## Testing"];
+            const missing = required.filter((section) => !body.includes(section));
+            if (missing.length) {
+              core.setFailed(`PR body is missing required sections: ${missing.join(", ")}`);
+            }

@@ -1,0 +1,13 @@
+# Default owner for all files.
+* @rish106-hub
+
+# Engine and policy-sensitive files need owner review.
+/src/engine/ @rish106-hub
+/src/domain/ @rish106-hub
+/src/providers/ @rish106-hub
+/tests/ @rish106-hub
+
+# Docs and repo process.
+/Documentation/ @rish106-hub
+/PLAN.md @rish106-hub
+/.github/ @rish106-hub
