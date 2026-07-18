@@ -18,10 +18,15 @@ Policy:
 - Requires CODEOWNERS review.
 - Dismisses stale approvals after new pushes.
 - Requires review-thread resolution.
-- Requires approval from someone other than the latest pusher.
 - Requires PR hygiene checks:
   - `Validate PR title`
   - `Validate PR body`
+
+## Why Latest-Pusher Approval Is Disabled
+
+The GitHub setting called `require_last_push_approval` blocks the person who pushed the latest commit from approving the PR.
+
+That is useful for larger teams, but it is too strict for this solo hackathon repo. It can block merge even when the PR has passed checks and has owner review.
 
 ## Apply
 
