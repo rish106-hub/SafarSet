@@ -11,6 +11,9 @@ export class FallbackRecoveryRepository {
   ) {}
 
   async load(tripId: string): Promise<Readonly<{ evidence: RecoveryEvidence | null; mode: PersistenceMode }>> {
+    if (await this.fallback.wasCleared?.(tripId)) {
+      return { evidence: null, mode: "LOCAL" };
+    }
     const local = await this.fallback.load(tripId);
     try {
       const remote = await this.primary.load(tripId);
@@ -36,5 +39,10 @@ export class FallbackRecoveryRepository {
     } catch {
       return "LOCAL";
     }
+  }
+
+  async clear(tripId: string): Promise<void> {
+    if (!this.fallback.clear) throw new Error("Local persistence cannot reset.");
+    await this.fallback.clear(tripId);
   }
 }

@@ -5,11 +5,13 @@ import {
   Activity,
   ClipboardCheck,
   FileClock,
+  FlaskConical,
   House,
   Menu,
   RotateCcw,
   Route,
   ShieldCheck,
+  TableProperties,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +36,8 @@ const items: readonly {
   { id: "trip", label: "Active trip", icon: Route },
   { id: "recovery", label: "Recovery", icon: Activity },
   { id: "audit", label: "Audit", icon: FileClock },
+  { id: "truth", label: "API truth", icon: TableProperties },
+  { id: "evaluation", label: "Evaluation", icon: FlaskConical },
 ];
 
 type WorkspaceNavProps = Readonly<{
@@ -138,7 +142,7 @@ export function WorkspaceNav(props: WorkspaceNavProps) {
                 Seeded family demo. No real bookings.
               </SheetDescription>
             </SheetHeader>
-            <div className="mt-6 flex h-[calc(100%-6rem)] flex-col">
+            <div className="mt-6 flex h-[calc(100%-6rem)] flex-col overflow-y-auto">
               <NavItems {...mobileProps} />
             </div>
           </SheetContent>

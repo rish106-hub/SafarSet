@@ -33,7 +33,14 @@ export type PersistedRecoveryResult = Readonly<{
 
 export type PersistedUiState = Readonly<{
   version: 1;
-  view: "benefit" | "policy" | "trip" | "recovery" | "audit";
+  view:
+    | "benefit"
+    | "policy"
+    | "trip"
+    | "recovery"
+    | "audit"
+    | "truth"
+    | "evaluation";
   phase:
     | "ready"
     | "disrupted"
@@ -78,6 +85,8 @@ export type PersistenceMode = "SUPABASE" | "LOCAL";
 export interface RecoveryRepository {
   load(tripId: string): Promise<RecoveryEvidence | null>;
   save(evidence: RecoveryEvidence): Promise<void>;
+  clear?(tripId: string): Promise<void>;
+  wasCleared?(tripId: string): Promise<boolean>;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

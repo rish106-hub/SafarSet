@@ -11,10 +11,12 @@ import {
 } from "@/domain";
 import { createHeroTrip, fixtureMetadata, HERO_NOW } from "@/data";
 import { AuditPanel } from "@/features/audit/audit-panel";
+import { EvaluationPanel } from "@/features/evaluation/evaluation-panel";
 import { BenefitEntry } from "@/features/landing/benefit-entry";
 import { PolicyPanel } from "@/features/policy/policy-panel";
 import { RecoveryPanel } from "@/features/recovery/recovery-panel";
 import { TripPanel } from "@/features/trip/trip-panel";
+import { TruthPanel } from "@/features/truth/truth-panel";
 import { getRecoveryRepository } from "@/persistence/client";
 import {
   HERO_TRIP_ID,
@@ -415,6 +417,7 @@ export function DemoWorkspace() {
     runGenerationRef.current += 1;
     runningRef.current = false;
     resetDemoState();
+    void getRecoveryRepository().clear(HERO_TRIP_ID);
   };
 
   if (state.view === "benefit") {
@@ -492,6 +495,15 @@ function View({
           onBack={() => onNavigate("recovery")}
         />
       );
+    case "truth":
+      return (
+        <TruthPanel
+          persistenceMode={state.persistenceMode}
+          onOpenEvaluation={() => onNavigate("evaluation")}
+        />
+      );
+    case "evaluation":
+      return <EvaluationPanel />;
     default:
       return null;
   }
