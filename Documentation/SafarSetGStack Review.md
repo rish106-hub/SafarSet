@@ -113,6 +113,15 @@ Reason:
 - Live data can be stale, unavailable, or unsuitable for synthetic trips.
 - Live mode should enrich the demo, not control it.
 
+Technical reality:
+
+- Public hackathon-grade travel APIs can support status checks, search, pricing, and sometimes order creation.
+- They usually do not support reissuing an already ticketed flight through a simple public self-service flow.
+- Real post-ticketing changes normally require deeper airline, GDS, OTA, or consolidator access.
+- Therefore, SafarSet should simulate reissue execution and make that label visible.
+
+The honest MVP is stronger than a fake one. Search and status can be live later; execution stays simulated until real commercial access exists.
+
 ### Deployment
 
 Use:
@@ -303,6 +312,8 @@ No duplicate execution should be possible for the same disruption and itinerary.
 
 The app should feel like an operations cockpit for a premium card travel benefit.
 
+The user is a tech-comfortable but time-poor parent. The UI should not behave like a chatbot that asks them to think during an airport crisis. It should show what happened, what SafarSet did, why unsafe choices were rejected, and whether the action was live, fixture-backed, or simulated.
+
 Recommended screens:
 
 1. Card-benefit landing page.
@@ -456,3 +467,5 @@ The right GStack is:
 The wrong build is an AI itinerary planner with a few travel cards.
 
 SafarSet wins if the deterministic recovery engine is strict, visible, tested, and boring in the right places.
+
+The defensible product claim is not "AI finds flights." It is "a pre-authorized policy engine restores the whole family journey without breaking safety rules."

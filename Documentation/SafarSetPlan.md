@@ -8,6 +8,24 @@ The target output is a deployed Vercel app, public GitHub repo, README, API Trut
 
 The first release must prove the deterministic recovery engine. It should not chase real ticketing, payments, visa checks, or a broad travel-planning product.
 
+## Repository Description
+
+Autonomous family travel recovery that rebooks flights, hotels, and transfers during disruptions.
+
+## Locked Assumptions
+
+- Working name: SafarSet.
+- Build target: portfolio-grade hybrid MVP.
+- Build team: solo unless changed later.
+- Build period: one to two weeks.
+- Cost target: INR 0.
+- First release: one synthetic demo family.
+- Notifications: in-app plus optional email.
+- Deployment: responsive web PWA.
+- Autonomy: automatic action only within pre-approved policy.
+- CodeStreet is the source brief, not an official submission claim.
+- A written eligibility exception is needed before treating this as an official final-year-only submission.
+
 ## Demo Promise
 
 Show that a premium cardholder family can be recovered from a missed international connection without manual panic.
@@ -26,6 +44,7 @@ The demo must make this clear:
 Seeded scenario:
 
 - Family: synthetic Gurgaon family of four.
+- Persona: affluent, dual-income, attention-constrained Indian parents with one or two children.
 - Route: Paris to Dubai to Delhi.
 - Disruption: Paris to Dubai delay makes Dubai to Delhi connection impossible.
 - Policy: keep family together, no self-transfer, at most one stop, premium economy or better, approved transit airports only, 90-minute international connection buffer, Delhi before Sunday 8 PM, auto-spend up to INR 75,000.
@@ -52,6 +71,7 @@ Expected demo flow:
 - Implement recovery engine.
 - Create 40 scenario fixtures.
 - Write hero demo script as an acceptance document.
+- Encode family-specific recovery constraints, including school and work deadline examples.
 
 ### Domain Types
 
@@ -205,6 +225,7 @@ Store:
 - Hide live behavior behind `PROVIDER_MODE=live`.
 - Label Amadeus results as live.
 - Fall back to fixtures when data is missing, stale, or unavailable.
+- Keep real reissue out of scope unless deeper airline or consolidator access is available.
 
 ### Exit Criteria
 
@@ -308,6 +329,7 @@ Core deliverables:
 
 - Deployed Vercel application.
 - Public GitHub repository.
+- Project description.
 - README with setup, architecture, limitations, costs, and test commands.
 - API Truth Table.
 - Short screen recording of the hero flow.
@@ -317,6 +339,18 @@ Optional deliverables:
 - Eight-slide pitch deck.
 - Formal evaluation report.
 - Separate architecture document.
+- Evaluation report with scenario results.
+
+## Demo Video Structure
+
+1. Family policy and pre-authorization.
+2. Active Paris to Dubai to Delhi trip.
+3. Injected missed connection.
+4. Candidate rejection and ranking.
+5. Automatic recovery.
+6. Hotel, transfer, and email confirmation.
+7. Audit trail and evaluation results.
+8. Production integration limitations.
 
 ## Cost and Secrets
 

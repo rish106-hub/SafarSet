@@ -34,9 +34,48 @@ The correct framing is:
 
 An affluent, dual-income Indian family travelling internationally with children.
 
+### ICP Detail
+
+The beachhead user is an Indian metro family, usually based around Delhi NCR or Gurgaon.
+
+Typical profile:
+
+- Parent age range: 35 to 40.
+- Household income: around INR 1.5 crore per year.
+- Both parents work.
+- One or two children, often in a premium school.
+- Travels two to three times per year.
+- Has prior international travel experience across Europe, the US, and Asia.
+- Uses credit cards, debit cards, and sometimes prepaid forex cards.
+- Is comfortable with apps and online payments, but does not want to manage logistics during a crisis.
+
+This user is informed, not helpless. The pain is not lack of intelligence. The pain is that disruption recovery steals scarce family time and forces rushed decisions while inventory is disappearing.
+
+### Beachhead ICP
+
+A premium Indian cardholder travelling internationally with a spouse and one or two children on a multi-leg itinerary, whose flight is cancelled or whose connection becomes impossible within 24 hours of travel.
+
+Do not start with:
+
+- Solo travellers.
+- Corporate travel.
+- Groups on different PNRs.
+- Medical emergencies.
+- Unaccompanied minors.
+- Complex visa changes.
+- Every airline and hotel provider.
+
 ## Buyer
 
 A premium credit-card issuer offering SafarSet as a card benefit.
+
+This is a B2B2C product:
+
+- Buyer: premium credit-card issuer, travel-insurance provider, airline, or OTA.
+- User: card member and travelling family.
+- Beneficiaries: spouse, children, and other travellers on the booking.
+
+The family wants peace of mind. The card issuer wants loyalty, fewer support calls, and a benefit that feels genuinely premium.
 
 ## North Star Metric
 
@@ -45,6 +84,19 @@ Trusted Autonomous Recovery Rate.
 Definition:
 
 The percentage of eligible disruptions recovered within five minutes without human help, hard-policy violations, duplicate actions, or later reversal.
+
+Supporting metrics:
+
+- Disruption detection precision.
+- Disruption detection time.
+- Percentage of valid disruptions detected.
+- Successful ticketing or simulated execution rate.
+- Median time to confirmed recovery.
+- Hard-constraint violation rate.
+- Duplicate or unnecessary action rate.
+- Human-escalation rate.
+- Recovery reversal rate.
+- Incremental cost per recovered journey.
 
 ## Problem
 
@@ -59,6 +111,51 @@ When a cancellation or missed connection happens, the family needs fast recovery
 - Human support can be expensive, delayed, and hard to audit.
 
 The user does not need another itinerary planner. The user needs a trusted recovery system that acts only inside clear rules.
+
+## Job To Be Done
+
+When my family's journey breaks, restore an acceptable end-to-end plan before alternatives disappear, without making me compare flights, call support, understand airline policies, or risk separating my family.
+
+Acceptable means:
+
+- The family stays together.
+- Transit and connection rules are safe.
+- Baggage and transfer risk is understood.
+- School and work deadlines are respected.
+- Cabin class does not fall below policy.
+- The incremental cost stays inside the approved limit.
+- Hotel, transfer, and notification actions are handled or safely queued.
+
+School calendars and work leave are not generic planning features. They become recovery constraints, such as getting the family home before school Monday or before a parent's work commitment.
+
+## Differentiation
+
+Generic rebooking tools can show another flight.
+
+SafarSet's wedge is narrower:
+
+> Pre-authorized, family-aware, end-to-end recovery with hard safety constraints.
+
+The strongest feature is the Family Recovery Policy set before travel. That policy gives the system permission to act safely. Without this pre-authorization, autonomous rebooking is reckless.
+
+## Accuracy Positioning
+
+Do not promise 100% recovery.
+
+Travel inventory changes, provider APIs fail, airlines reject changes, and some bookings cannot be modified externally.
+
+Separate accuracy into:
+
+- Detection accuracy: did a real disruption happen?
+- Decision validity: is the recovery safe and policy-compliant?
+- Execution success: did the provider or simulator accept the action?
+
+For this build, the rational target is:
+
+- 100% hard-constraint compliance.
+- Zero actions on uncertain or contradictory disruption data.
+- At least 95% recovery success across eligible simulated cases.
+- Safe escalation for unsupported cases.
 
 ## Product Principles
 
