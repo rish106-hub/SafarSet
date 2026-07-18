@@ -230,7 +230,7 @@ export function createHeroInput(
 
 export const heroTrip = createHeroTrip();
 export const heroCandidates = [
-  createCandidate(),
+  createCandidate({ requiresOvernight: true }),
   createCandidate({ id: "candidate-split-002", seatsAvailable: 3 }),
   createCandidate({ id: "candidate-self-transfer-003", selfTransfer: true }),
 ] as const;
