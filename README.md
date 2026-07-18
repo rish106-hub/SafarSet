@@ -1,69 +1,52 @@
 # SafarSet
 
+[![CI](https://github.com/rish106-hub/SafarSet/actions/workflows/ci.yml/badge.svg)](https://github.com/rish106-hub/SafarSet/actions/workflows/ci.yml)
 [![PR Hygiene](https://github.com/rish106-hub/SafarSet/actions/workflows/pr-hygiene.yml/badge.svg)](https://github.com/rish106-hub/SafarSet/actions/workflows/pr-hygiene.yml)
 [![Repo Labels](https://github.com/rish106-hub/SafarSet/actions/workflows/repo-labels.yml/badge.svg)](https://github.com/rish106-hub/SafarSet/actions/workflows/repo-labels.yml)
 
-SafarSet is a deterministic family travel-disruption recovery concierge.
+SafarSet is a deterministic family travel-disruption recovery concierge. Current branch implements engine foundation only.
 
-The product promise is simple:
+## Requirements
 
-> Your family's trip is recovered before you need to manage it.
+- Node.js 20.9 or newer
+- npm
 
-## Main Branch Scope
+## Commands
 
-`main` is the approved documentation and project-control branch.
+```bash
+npm install
+npm run dev
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
 
-It contains:
+## Current Scope
 
-- Product plan.
-- PRD.
-- Build plan.
-- Architecture notes.
-- Stage specs.
-- Contribution rules.
-- Security policy.
-- GitHub issue and PR templates.
-- Repository automation for labeling and PR hygiene.
+- Explicit domain model.
+- Cancellation and missed-connection detection.
+- Seven hard recovery constraints.
+- Explainable weighted ranking.
+- Autonomous, approval, and escalation decisions.
+- Caller-owned duplicate-execution protection.
+- Forty deterministic scenario fixtures.
+- No external services or credentials.
 
-Implementation code stays on scoped branches until explicitly approved.
+See [PLAN.md](./PLAN.md), [architecture](./Documentation/ARCHITECTURE.md), and [branch specs](./Documentation/specs/).
 
-Current implementation branch:
-
-- `codex/spec1`
-
-## Product Direction
-
-SafarSet detects a cancellation or missed connection, searches alternatives, rejects unsafe or policy-breaking choices, ranks valid routes, and executes a clearly labelled simulated recovery inside a pre-approved spending limit.
-
-The deterministic recovery engine is the product. External integrations improve the experience, but the demo must keep working without them.
-
-## Documentation
-
-- [Build Plan](./PLAN.md)
-- [PRD](./Documentation/SafarSetPRD.md)
-- [Implementation Plan](./Documentation/SafarSetPlan.md)
-- [GStack Review](./Documentation/SafarSetGStack%20Review.md)
-- [Architecture](./Documentation/ARCHITECTURE.md)
-- [Hero Demo Acceptance](./Documentation/HeroDemoAcceptance.md)
-- [Stage Specs](./Documentation/specs/)
-- [Contribution Guidelines](./CONTRIBUTING.md)
-- [Security Policy](./SECURITY.md)
-
-## Contribution Flow
+## Contributing
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
 
-Short version:
+Main requirements:
 
-- Work from a scoped branch.
-- Do not push implementation code directly to `main`.
+- Work from a scoped branch, not directly on `main`.
+- Keep demo mode working without API keys.
+- Run lint, typecheck, tests, and build before review.
 - Keep real traveller data and secrets out of the repo.
-- Use the PR template.
-- Explain safety impact.
-- Keep simulated actions visibly labelled.
+- Use the pull request template and explain safety impact.
 
 ## Safety
 
-All travellers and bookings are synthetic.
-
-SafarSet must not collect or commit real passport, payment-card, PNR, child, or booking data.
+All travellers and bookings are synthetic. Current code does not collect passport, payment-card, PNR, or real child data. Ticket, hotel, and transfer execution remains out of scope for this branch.
