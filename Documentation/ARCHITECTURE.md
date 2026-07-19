@@ -1,90 +1,74 @@
-# SafarSet Architecture
+# SafarSet Production Beta Architecture
 
-## Core Rule
+## Runtime boundary
 
-`src/engine` is deterministic policy code. It may import only `src/domain` and other engine modules. It cannot import React, Next.js, providers, persistence, browser APIs, environment variables, network clients, clocks, random values, or mutable module state.
-
-Current time, provider consistency, execution availability, and used idempotency keys enter through function inputs.
-
-## Dependency Direction
+Production routes never import fixture data or demo providers.
 
 ```text
-app and features
-  -> application services
-  -> provider and persistence contracts
-  -> engine
-  -> domain
+src/app
+  -> src/application/dal
+  -> Supabase client with the signed-in session
+  -> Postgres RLS
 
-demo, Supabase, Resend, Gemini, and Amadeus adapters
-  -> their contract
+src/app/api
+  -> verified Supabase user
+  -> server-only provider service
+  -> Aviationstack or Google
+
+src/application/services
+  -> provider contracts
+  -> deterministic engine
   -> domain
 ```
 
-Adapters never change engine rules. Application services coordinate I/O around a completed deterministic decision.
+The engine still imports only domain and engine modules. It has no network, storage, environment, React, Next.js, clock, or randomness dependency.
 
-The Amadeus adapter is server-only. A client fallback wrapper rejects stale, incomplete, conflicting, unavailable, or discontinuous live data before it reaches the engine. Valid live offers are added beside deterministic fixtures, never substituted for the fixture floor. Live status and search can enrich the flow. Execution always uses the demo adapter.
+## Authentication
 
-## Planned Tree
+- Supabase Auth owns password hashing and sessions.
+- `@supabase/ssr` stores sessions in cookies.
+- `src/proxy.ts` refreshes sessions and provides navigation redirects.
+- Every page, action, and route handler rechecks authentication.
+- Admin authorization reads `app_metadata.role`. User-editable metadata is never used for authorization.
+- Service-role keys are server-only.
 
-```text
-Documentation/specs/              Branch contracts
-src/app/                           Next.js routes and layouts
-src/components/ui/                 Shared UI primitives
-src/components/layout/             Navigation and shells
-src/features/policy/               Policy presentation and editing
-src/features/trip/                 Active trip presentation
-src/features/recovery/             Recovery flow and explanations
-src/features/audit/                Audit presentation
-src/features/truth/                API Truth Table
-src/features/evaluation/           Fixture evaluation dashboard
-src/domain/models/                 Stable business data contracts
-src/engine/                        Pure recovery policy engine
-src/application/ports/             Persistence and orchestration ports
-src/application/services/          Recovery workflow coordination
-src/providers/contracts/           External service interfaces
-src/providers/demo/                Deterministic fixture adapters
-src/providers/amadeus/             Optional status and search adapter
-src/providers/resend/              Optional email adapter
-src/providers/gemini/              Optional prose adapter
-src/persistence/contracts/         Audit repository interface
-src/persistence/local/             Browser fallback
-src/persistence/supabase/          Optional server persistence
-src/data/                           Synthetic family, trip, and scenarios
-src/lib/                            Environment, formatting, validation
-tests/unit/                         Module-level engine tests
-tests/scenarios/                    Deterministic fixture suite
-tests/integration/                  Manually enabled service tests
-tests/e2e/                          Playwright hero flow
-supabase/migrations/                Database schema
-```
+## Database ownership
 
-Only directories with working files should exist. Later branches add their modules when implementation starts.
+Exposed tables:
 
-## Data Rules
+- `profiles`
+- `policies`
+- `trips`
+- `trip_segments`
+- `recovery_runs`
+- `audit_events`
 
-- IDs are opaque strings.
-- Times are ISO-8601 UTC strings.
-- Airports are uppercase IATA codes.
-- Money uses integer minor units and explicit `INR` currency.
-- Every provider result includes source, mode, simulation status, observation time, and confidence.
-- Only synthetic travellers are allowed.
-- Passport, card, PNR, and real child data are forbidden.
+Every table has RLS. Customer writes require `auth.uid() = user_id`. Segment writes also require ownership of the parent trip. Trip writes also require ownership of the linked policy.
 
-## Ranking
+Provider tokens live in `private.provider_connections`. The private schema is not exposed to customer roles.
 
-Only candidates passing every hard constraint enter ranking. Numeric factors use lower-is-better min-max normalization across eligible candidates.
+## Provider boundary
 
-- Arrival delay: 40%
-- Incremental cost: 25%
-- Stops: 15%
-- Overnight inconvenience: 10%
-- Departure wait: 10%
+Google Calendar:
 
-Ties resolve by lower cost, earlier arrival, then lexical candidate ID.
+- OAuth state is stored in an HTTP-only cookie.
+- Access and refresh tokens use AES-256-GCM at rest.
+- Read-only calendar-event scope.
+- Imported event data is treated as a candidate, not a saved trip.
 
-## Runtime Modes
+Aviationstack:
 
-- `DEMO`: fixtures, simulated actions, browser storage, no secrets.
-- `LIVE`: best-effort live status and search, simulated execution, automatic demo fallback.
+- API key stays server-only.
+- One live-status request is made for each saved flight segment.
+- Status is fetched before disruption detection.
+- The API does not supply alternate offers. SafarSet escalates rather than inventing one.
+- Ticket execution is absent.
+- Provider errors return an unavailable response. Production does not silently substitute fixtures.
 
-No optional adapter may make `DEMO` mode less reliable.
+## Disruption semantics
+
+Live timing passes through deterministic cancellation and missed-connection detection. A disruption returns current timing evidence and an escalation instruction. No external offer, cost, seat, or booking claim is created without a provider that can supply it.
+
+## Test fixtures
+
+`src/data` contains synthetic fixtures for unit and scenario tests only. Production route modules do not import it. This separation keeps hard-rule regression coverage without putting synthetic customer data into the product.

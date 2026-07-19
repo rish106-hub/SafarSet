@@ -36,4 +36,23 @@ describe("evaluateConstraints", () => {
       false,
     );
   });
+
+  it("honours customer-disabled family and self-transfer rules", () => {
+    const evaluation = evaluateCandidate({
+      candidate: createCandidate({ seatsAvailable: 1, selfTransfer: true }),
+      family: heroFamily,
+      policy: {
+        ...heroPolicy,
+        requireFamilyTogether: false,
+        forbidSelfTransfer: false,
+      },
+    });
+
+    expect(
+      evaluation.checks.find((check) => check.rule === ConstraintRule.FamilyTogether)?.passed,
+    ).toBe(true);
+    expect(
+      evaluation.checks.find((check) => check.rule === ConstraintRule.NoSelfTransfer)?.passed,
+    ).toBe(true);
+  });
 });

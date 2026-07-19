@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "SafarSet Recovery Control",
     short_name: "SafarSet",
-    description: "Deterministic family travel-disruption recovery demo.",
+    description: "Private travel monitoring and recovery control for families.",
     start_url: "/",
     display: "standalone",
-    background_color: "#06101c",
-    theme_color: "#07101c",
+    background_color: "#f7fafc",
+    theme_color: "#102a43",
     icons: [
       {
         src: "/safarset-icon.svg",

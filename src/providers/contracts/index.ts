@@ -1,11 +1,6 @@
 import type {
-  DisruptionEvent,
-  FamilyProfile,
   FlightSegment,
-  Money,
   ProviderMetadata,
-  RecoveryCandidate,
-  RecoveryPolicy,
   Trip,
 } from "@/domain";
 
@@ -19,39 +14,15 @@ export type FlightStatusResult = Readonly<{
   provider: ProviderMetadata;
 }>;
 
-export type AlternativeSearchInput = Readonly<{
-  trip: Trip;
-  disruption: DisruptionEvent;
-  family: FamilyProfile;
-  policy: RecoveryPolicy;
-  observedAt: string;
-}>;
-
-export type RebookingInput = Readonly<{
-  tripId: string;
-  candidate: RecoveryCandidate;
-  idempotencyKey: string;
-}>;
-
-export type RebookingResult = Readonly<{
-  accepted: boolean;
-  confirmationCode: string | null;
-  provider: ProviderMetadata;
-}>;
-
-export interface TravelProvider {
+export interface FlightStatusProvider {
   getFlightStatus(input: FlightStatusInput): Promise<FlightStatusResult>;
-  searchAlternatives(
-    input: AlternativeSearchInput,
-  ): Promise<readonly RecoveryCandidate[]>;
-  executeRebooking(input: RebookingInput): Promise<RebookingResult>;
 }
 
 export type StayChangeInput = Readonly<{
   tripId: string;
   checkIn: string;
   checkOut: string;
-  maximumCost: Money;
+  maximumCost: import("@/domain").Money;
   idempotencyKey: string;
 }>;
 

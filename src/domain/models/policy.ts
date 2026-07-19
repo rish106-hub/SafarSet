@@ -13,8 +13,8 @@ export type FamilyProfile = Readonly<{
 export type RecoveryPolicy = Readonly<{
   id: string;
   familyId: string;
-  requireFamilyTogether: true;
-  forbidSelfTransfer: true;
+  requireFamilyTogether: boolean;
+  forbidSelfTransfer: boolean;
   maxStops: number;
   minimumCabin: CabinClass;
   approvedTransitAirports: readonly string[];

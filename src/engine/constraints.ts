@@ -73,15 +73,17 @@ export function evaluateConstraints(
     check(
       candidate.id,
       ConstraintRule.FamilyTogether,
-      candidate.seatsAvailable >= family.travelerCount,
-      `All ${family.travelerCount} travellers have seats.`,
+      !policy.requireFamilyTogether || candidate.seatsAvailable >= family.travelerCount,
+      policy.requireFamilyTogether
+        ? `All ${family.travelerCount} travellers have seats.`
+        : "Family-together rule is disabled.",
       `Only ${candidate.seatsAvailable} seats for ${family.travelerCount} travellers.`,
     ),
     check(
       candidate.id,
       ConstraintRule.NoSelfTransfer,
-      !candidate.selfTransfer,
-      "No self-transfer required.",
+      !policy.forbidSelfTransfer || !candidate.selfTransfer,
+      policy.forbidSelfTransfer ? "No self-transfer required." : "Self-transfer rule is disabled.",
       "Route requires a self-transfer.",
     ),
     check(
