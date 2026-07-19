@@ -6,10 +6,10 @@ import { PwaRegistration } from "@/components/pwa-registration";
 
 export const metadata: Metadata = {
   title: {
-    default: "SafarSet | Travel recovery control",
+    default: "SafarSet | Your family travel agent",
     template: "%s | SafarSet",
   },
-  description: "Monitor trips, enforce recovery rules, and review live disruption options in one place.",
+  description: "Plan family travel, keep bookings together, set recovery rules, and get a clear next step when plans change.",
   applicationName: "SafarSet",
   appleWebApp: {
     capable: true,

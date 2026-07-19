@@ -1,11 +1,12 @@
 "use client";
 
-import { CalendarPlus, Home, PlaneTakeoff, Settings2, ShieldCheck } from "lucide-react";
+import { CalendarPlus, Home, PlaneTakeoff, Settings2, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/dashboard", label: "Home", icon: Home, match: (path: string) => path === "/dashboard" },
+  { href: "/agent", label: "Travel agent", icon: Sparkles, match: (path: string) => path === "/agent" },
   { href: "/trips", label: "Trips", icon: PlaneTakeoff, match: (path: string) => path === "/trips" || path.startsWith("/trips/") && path !== "/trips/new" },
   { href: "/trips/new", label: "Add trip", icon: CalendarPlus, match: (path: string) => path === "/trips/new" },
   { href: "/settings", label: "Settings", icon: Settings2, match: (path: string) => path === "/settings" || path === "/account" || path === "/policy" || path === "/connections" },
