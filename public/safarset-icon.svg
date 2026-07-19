@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SafarSet">
+  <rect width="512" height="512" rx="96" fill="#102A43"/>
+  <path d="M84 120h246c70 0 70 108 0 108H210c-88 0-88 124 0 124h142c68 0 68 96 0 96H112" fill="none" stroke="#F7FAFC" stroke-width="38" stroke-linecap="round"/>
+  <path d="M106 120h102m42 108h78M172 352h92" fill="none" stroke="#2CB1BC" stroke-width="22" stroke-linecap="round" stroke-dasharray="26 30"/>
+  <circle cx="84" cy="120" r="25" fill="#2CB1BC"/>
+  <circle cx="112" cy="448" r="25" fill="#F6AD55"/>
+</svg>

@@ -1,216 +1,169 @@
 # SafarSet
 
-[![PR Hygiene](https://github.com/rish106-hub/SafarSet/actions/workflows/pr-hygiene.yml/badge.svg)](https://github.com/rish106-hub/SafarSet/actions/workflows/pr-hygiene.yml)
-[![Repo Labels](https://github.com/rish106-hub/SafarSet/actions/workflows/repo-labels.yml/badge.svg)](https://github.com/rish106-hub/SafarSet/actions/workflows/repo-labels.yml)
+SafarSet is a private beta travel monitoring and recovery-control application for families.
 
-SafarSet is a family travel-disruption recovery concierge for premium cardholders.
+This branch replaces the hackathon demo with account-scoped customer data, real trip entry, configurable recovery rules, optional Google Calendar import, and Aviationstack live flight-status checks.
 
-It helps a travelling family recover from a cancellation or missed connection before they have to manage the crisis themselves.
+## What works
 
-## Product Promise
+- Supabase email and password authentication using SSR cookies.
+- Customer-owned profiles, policies, trips, segments, audit events, and recovery checks.
+- Row Level Security on every exposed customer table.
+- Hidden role-based admin portal.
+- Manual trip entry with one to eight continuous flight segments.
+- Customer controls for family seating, self-transfer, cabin, stops, transit airports, connection time, arrival delay, spend, approval, overnight waits, and notifications.
+- Google Calendar OAuth with read-only event access, encrypted server-side tokens, refresh handling, deterministic route detection, and mandatory review before import.
+- Aviationstack live flight status when the operator API key exists.
+- Deterministic disruption detection against customer constraints.
+- Clear unavailable states when a provider or credential is missing.
 
-> Your family's trip is recovered before you need to manage it.
+## What does not work yet
 
-## The Problem
+- Ticket reissue or airline inventory hold.
+- Hotel or transfer booking.
+- Universal OTA, airline, or PNR import.
+- Gmail inbox scanning. Gmail read access uses restricted scopes and is intentionally excluded from this small beta.
+- Automatic spending or payment processing.
 
-Flight disruption recovery is still too manual.
+SafarSet reports live status and detected disruption. It does not claim a real booking transaction or fabricate replacement offers.
 
-When a family misses an international connection, the traveller has to compare flights, protect hotel bookings, coordinate airport transfer changes, call support, understand policy limits, and avoid bad choices while alternative seats disappear.
+## Local setup
 
-That is not a normal planning problem. It is a time-sensitive recovery problem.
+Requirements:
 
-## Target User
-
-SafarSet starts with a narrow ICP:
-
-- Affluent, dual-income Indian family.
-- Based in a metro area such as Gurgaon or Delhi NCR.
-- Travels internationally with one or two children.
-- Uses premium cards, forex products, and online travel tools.
-- Values control, but does not want to handle logistics during airport disruption.
-
-The user is not helpless. They are busy, informed, and willing to pre-authorize rules if the system acts safely.
-
-## Buyer
-
-SafarSet is a B2B2C product.
-
-- Buyer: premium credit-card issuer, travel insurer, airline, or OTA.
-- User: card member and travelling family.
-- Beneficiaries: spouse, children, and other travellers on the booking.
-
-For the buyer, SafarSet is a premium retention benefit. It can reduce support load and create a card benefit that feels tangible during a stressful moment.
-
-## Core Insight
-
-Generic rebooking tools show options.
-
-SafarSet is different because it uses a pre-approved Family Recovery Policy before disruption happens.
-
-That policy defines what the system can and cannot do:
-
-- Keep the family together.
-- Never use self-transfer.
-- Preserve premium economy or better.
-- Use only approved transit airports.
-- Maintain safe international connection buffers.
-- Arrive before a hard school or work deadline.
-- Spend automatically only within a pre-approved limit.
-
-The product is not "AI finds flights." The product is "a policy-safe recovery engine restores the whole family journey."
-
-## Hero Scenario
-
-A synthetic Gurgaon family of four is returning from Paris through Dubai to Delhi.
-
-The Paris to Dubai flight is delayed enough to make the Dubai to Delhi connection impossible.
-
-SafarSet:
-
-1. Detects the missed connection.
-2. Searches alternative routes for all four travellers.
-3. Rejects unsafe or policy-breaking options.
-4. Ranks valid routes with an explainable score.
-5. Selects the best route within the automatic spend limit.
-6. Executes a visibly simulated reissue.
-7. Simulates hotel and transfer changes when needed.
-8. Shows confirmation and audit trail.
-
-## North Star
-
-Trusted Autonomous Recovery Rate.
-
-Definition:
-
-The percentage of eligible disruptions recovered within five minutes without human help, hard-policy violations, duplicate actions, or later reversal.
-
-Supporting metrics:
-
-- Detection time.
-- Hard-constraint violation rate.
-- Duplicate execution rate.
-- Human escalation rate.
-- Recovery success rate when a valid option exists.
-- Median time to confirmed recovery.
-- User clarity of notification.
-
-## MVP Scope
-
-The first version proves the recovery engine and demo flow.
-
-In scope:
-
-- Family recovery policy.
-- Active trip dashboard.
-- Deterministic disruption injection.
-- Candidate rejection and ranking.
-- Simulated flight reissue.
-- Simulated hotel and transfer recovery.
-- Audit trail.
-- API truth labels.
-- Evaluation dashboard.
-
-Out of scope:
-
-- Real ticket reissue.
-- Real hotel or transfer booking.
-- Real payment processing.
-- Production auth.
-- Global visa-rule interpretation.
-- LLM-based route selection or spend approval.
-
-## Operating Principle
-
-Demo mode must work without external services.
-
-External services can improve the product, but they must not control the core recovery decision. If Amadeus, Supabase, Resend, or Gemini fails, the demo should still complete through deterministic fixtures and browser storage.
-
-## Source Documents
-
-Start here:
-
-- [SafarSet PRD](./Documentation/SafarSetPRD.md)
-- [SafarSet Plan](./Documentation/SafarSetPlan.md)
-- [SafarSet GStack Review](./Documentation/SafarSetGStack%20Review.md)
-- [Build Plan](./PLAN.md)
-
-Supporting docs:
-
-- [Architecture](./Documentation/ARCHITECTURE.md)
-- [Hero Demo Acceptance](./Documentation/HeroDemoAcceptance.md)
-- [Stage Specs](./Documentation/specs/)
-- [Contribution Guidelines](./CONTRIBUTING.md)
-- [Security Policy](./SECURITY.md)
-- [Main Branch Ruleset](./.github/rulesets/README.md)
-
-## Branch Policy
-
-`main` is the approved documentation and repository-governance branch.
-
-Implementation work stays on scoped branches until explicitly approved.
-
-Current implementation branch:
-
-- `codex/spec4-notifications`
-
-## Demo Notes
-
-Current implementation branches may include a local demo.
+- Node.js 20.19 or newer.
+- Supabase CLI 2.109.1 or newer.
+- Docker Desktop for local Supabase.
 
 ```bash
 npm install
+cp .env.example .env.local
+supabase start
+supabase db reset
+npm run verify:database
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). No external credentials are required.
-
-Expected demo flow:
-
-1. Review protected trip benefit.
-2. Edit or accept family recovery policy.
-3. Open active Paris to Dubai to Delhi trip.
-4. Inject deterministic disruption.
-5. Run safe recovery.
-6. Review confirmations, rejected alternatives, and audit trail.
-7. Reset and repeat.
-
-## Optional Supabase Persistence
-
-Spec 3 mirrors complete recovery evidence to Supabase when server credentials exist. Local storage is written first, so a missing or failed Supabase connection does not block recovery.
+Use the values printed by `supabase status`:
 
 ```bash
-cp .env.example .env.local
-npx supabase link --project-ref <project-ref>
-npx supabase db push
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable-or-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 ```
 
-Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`. The service role key is server-only. Never add `NEXT_PUBLIC_` to it.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Optional Recovery Communication
+## Admin account
 
-The app always creates deterministic in-app confirmation. Gemini may rewrite the completed message, and Resend may deliver it by email. Neither service can select a route or change policy decisions.
+Admin access is controlled by Supabase `app_metadata.role`. It is not based on the email string alone.
 
-Set any needed values in `.env.local`:
+For local beta testing, you may use the requested credentials:
 
 ```bash
-GEMINI_API_KEY=
-RESEND_API_KEY=
-RESEND_FROM_EMAIL=
-RESEND_TO_EMAIL=
+ADMIN_EMAIL=admin@admin.com
+ADMIN_PASSWORD='admin@123'
+npm run seed:admin
 ```
 
-If any value is missing or either provider fails, recovery still finishes and the audit records the fallback.
+The seed script blocks `admin@123` when `VERCEL_ENV=production`. Use a unique production secret stored outside git.
 
-Real email delivery is excluded from the normal test suite. Trigger one synthetic delivery manually with:
+Normal users use the same login page. Admin users are redirected to `/admin`. The admin route is not linked from the public site.
+
+## Google Calendar
+
+Google Cloud project: `safarset-502905`. Enable the Google Calendar API, create an External testing OAuth app, add beta users as test users, and create a Web application client with:
+
+```text
+Authorized JavaScript origin: http://localhost:3000
+Authorized redirect URI: http://localhost:3000/api/connections/google/callback
+```
+
+For production, add the exact deployed origin and callback separately:
+
+```text
+https://YOUR_DOMAIN
+https://YOUR_DOMAIN/api/connections/google/callback
+```
+
+Set:
 
 ```bash
-npm run test:integration:resend
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/connections/google/callback
+GOOGLE_TOKEN_ENCRYPTION_KEY=
 ```
 
-## Safety Rules
+Generate a 32-byte encryption key:
 
-- Use synthetic travellers only.
-- Do not collect or commit real passport, payment-card, PNR, child, or booking data.
-- Do not claim real ticket, hotel, transfer, or payment execution until commercial provider access exists.
-- Label simulated actions visibly, such as `SIMULATED_REISSUE`.
-- LLMs may write prose only. They must not choose routes, approve spend, or interpret safety rules.
+```bash
+openssl rand -base64 32
+```
+
+SafarSet requests only `calendar.events.readonly`. It prioritises flight events created from Gmail and validates detected IATA codes against the bundled OurAirports index. Detected trips are never saved without review.
+
+## Aviationstack
+
+```bash
+PROVIDER_MODE=live
+AVIATIONSTACK_API_KEY=
+```
+
+Aviationstack is the only flight-data provider. It checks live status for saved flight numbers. It does not supply booking ownership, rebooking offers, seat inventory, ticket changes, or payments. On disruption, SafarSet records the evidence and tells the customer to contact the airline or booking provider.
+
+## Hosted Supabase
+
+Apply migrations:
+
+```bash
+supabase link --project-ref <project-ref>
+supabase db push
+```
+
+For a closed beta, disable email confirmation in the hosted Auth settings if immediate sign-in is required. For a wider release, enable confirmation, configure custom SMTP, CAPTCHA, and leaked-password protection.
+
+Add `private` to the hosted project API schema allow-list. The migration revokes this schema from browser roles and grants it only to `service_role`. This lets server-only Google connection code use PostgREST without exposing provider tokens to customers.
+
+## Validation
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run test:e2e
+npm run verify:database
+```
+
+`verify:database` creates two temporary local users, checks cross-customer isolation, and deletes both users. It requires the three Supabase environment variables listed above.
+
+With local Supabase running, `npm run test:e2e:local-auth` creates one temporary customer, verifies customer and admin browser flows, and removes the temporary customer.
+
+Authenticated browser coverage runs when these are set:
+
+```bash
+E2E_USER_EMAIL=
+E2E_USER_PASSWORD=
+```
+
+## Architecture
+
+```text
+Server Components and Route Handlers
+  -> authenticated data access layer
+  -> Supabase Auth and RLS data
+  -> provider adapters
+  -> deterministic recovery engine
+  -> domain models
+```
+
+Test fixtures remain in `src/data` only to verify the deterministic engine. No production page, action, or API route imports them.
+
+Read:
+
+- [Production beta spec](./Documentation/specs/07-production-beta-rebuild.md)
+- [Architecture](./Documentation/ARCHITECTURE.md)
+- [Brand system](./Documentation/BRAND.md)
+- [Integration order](./Documentation/INTEGRATIONS.md)
+- [Operations](./Documentation/OPERATIONS.md)
