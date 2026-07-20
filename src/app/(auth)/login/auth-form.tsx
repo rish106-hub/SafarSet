@@ -2,10 +2,10 @@
 
 import { useActionState, useState } from "react";
 
-import { loginAction, signupAction } from "./actions";
+import { googleLoginAction, loginAction, signupAction } from "./actions";
 
-export function AuthForm({ next, configured }: Readonly<{ next?: string; configured: boolean }>) {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+export function AuthForm({ next, configured, initialMode = "login" }: Readonly<{ next?: string; configured: boolean; initialMode?: "login" | "signup" }>) {
+  const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [loginState, loginFormAction, loginPending] = useActionState(loginAction, null);
   const [signupState, signupFormAction, signupPending] = useActionState(signupAction, null);
   const state = mode === "login" ? loginState : signupState;
@@ -21,9 +21,11 @@ export function AuthForm({ next, configured }: Readonly<{ next?: string; configu
           </button>
         ))}
       </div>
-      <form action={action} className="mt-7 space-y-5">
+      <form action={googleLoginAction} className="mt-7"><button className="flex w-full items-center justify-center gap-3 rounded-lg border border-[#BCCCDC] bg-white px-4 py-3 text-sm font-medium text-[#243B53] hover:bg-[#F7FAFC] disabled:opacity-50" disabled={!configured} type="submit"><span className="grid size-5 place-items-center rounded-full border text-[11px] font-semibold">G</span> Continue with Google</button></form>
+      <div className="my-5 flex items-center gap-3 text-xs text-[#9FB3C8]"><span className="h-px flex-1 bg-[#E4E7EB]" /> or use email <span className="h-px flex-1 bg-[#E4E7EB]" /></div>
+      <form action={action} className="space-y-5">
         <input name="next" type="hidden" value={next ?? ""} />
-        {mode === "signup" && <Field label="Full name" name="fullName" autoComplete="name" />}
+        {mode === "signup" && <><Field label="Full name" name="fullName" autoComplete="name" /><Field label="Beta invite code" name="inviteCode" autoComplete="off" /></>}
         <Field label="Email" name="email" type="email" autoComplete="email" />
         <Field label="Password" name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} />
         {state?.error && <p className="rounded-lg border border-[#F6AD55]/60 bg-[#FFF8EC] px-4 py-3 text-sm text-[#7B4B00]" role="status">{state.error}</p>}
@@ -32,7 +34,7 @@ export function AuthForm({ next, configured }: Readonly<{ next?: string; configu
           {pending ? "Working…" : mode === "login" ? "Sign in" : "Create beta account"}
         </button>
       </form>
-      <p className="mt-5 text-xs leading-5 text-[#7B8794]">Private beta accounts use Supabase Auth. Passwords are never stored by SafarSet.</p>
+      <p className="mt-5 text-xs leading-5 text-[#7B8794]">Google sign-in works for approved beta accounts. New accounts need an invite. Authentication is handled by Supabase.</p>
     </div>
   );
 }

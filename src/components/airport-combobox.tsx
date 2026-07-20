@@ -35,7 +35,6 @@ export function AirportCombobox({
   const [query, setQuery] = useState(selected ? `${airportDisplayCity(selected)} (${selected.code})` : "");
   const [open, setOpen] = useState(false);
   const results = useMemo(() => searchAirports(query), [query]);
-
   return (
     <div className="relative">
       <label className="block text-sm font-medium text-[#334E68]" htmlFor={id}>{label}</label>

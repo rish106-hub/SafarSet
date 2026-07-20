@@ -54,6 +54,8 @@ try {
   });
   if (error) throw error;
   customerId = data.user.id;
+  const { error: accessError } = await supabase.from("profiles").update({ beta_access_granted_at: new Date().toISOString() }).eq("user_id", customerId);
+  if (accessError) throw accessError;
 
   const child = spawn("npx", ["playwright", "test", "tests/e2e/authenticated-beta.spec.ts"], {
     stdio: "inherit",

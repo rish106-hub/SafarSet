@@ -2,10 +2,23 @@ import { expect, test } from "@playwright/test";
 
 test("production landing explains the real beta workflow", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Set the rules before the trip goes wrong." })).toBeVisible();
-  await expect(page.getByText("No real booking is claimed.")).toBeVisible();
-  await expect(page.getByRole("link", { name: /Open the private beta/ })).toHaveAttribute("href", "/login");
+  await expect(page.getByRole("heading", { name: /When a family trip changes/ })).toBeVisible();
+  await expect(page.getByText("You approve changes")).toBeVisible();
+  await expect(page.getByRole("link", { name: /See a recovery example/ })).toHaveAttribute("href", "#recovery-example");
+  await expect(page.getByText("Example only · no live inventory · no booking executed")).toBeVisible();
   await expect(page.getByText("Google Calendar read-only import is next.")).toHaveCount(0);
+});
+
+test("visitor receives value and customizes a policy before signup", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "Family rules" }).click();
+  await expect(page.getByRole("heading", { name: "Build your starter travel policy." })).toBeVisible();
+  await page.getByRole("button", { name: /Avoid overnight waits/ }).click();
+  await expect(page.getByText("Draft saved on this device.")).toBeVisible();
+  await page.getByRole("link", { name: "Save this to SafarSet" }).click();
+  await expect(page).toHaveURL(/\/signup\?from=starter/);
+  await expect(page.getByText("Starter policy ready")).toBeVisible();
+  await expect(page.getByText("1 OF 4")).toBeVisible();
 });
 
 test("account access is clear and respects environment configuration", async ({ page }) => {
@@ -27,7 +40,7 @@ test("brand kit is available and uses the production mark", async ({ page }) => 
 
 test("public pages do not overflow at 390px", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/", "/login", "/brand"]) {
+  for (const path of ["/", "/login", "/signup", "/brand", "/privacy", "/terms"]) {
     await page.goto(path);
     const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: window.innerWidth }));
     expect(width.scroll).toBeLessThanOrEqual(width.inner);

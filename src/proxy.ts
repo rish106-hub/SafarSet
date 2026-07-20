@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { updateSupabaseSession } from "@/lib/supabase/proxy";
 
-const protectedPrefixes = ["/dashboard", "/trips", "/policy", "/connections", "/account", "/admin"];
+const protectedPrefixes = ["/dashboard", "/trips", "/policy", "/connections", "/account", "/settings", "/agent", "/onboarding", "/admin"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
   if (pathname.startsWith("/admin") && user?.app_metadata.role !== "admin") {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
-  if (pathname === "/login" && user) {
+  if ((pathname === "/login" || pathname === "/signup") && user) {
     return NextResponse.redirect(
       new URL(user.app_metadata.role === "admin" ? "/admin" : "/dashboard", request.url),
     );
