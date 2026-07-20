@@ -55,15 +55,32 @@ export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
   let conversationId = parsed.data.conversationId;
   if (!conversationId) {
-    const { data } = await supabase.from("agent_conversations").insert({ user_id: user.id, title: parsed.data.message.slice(0, 80) }).select("id").single();
+    const { data, error: conversationError } = await supabase
+      .from("agent_conversations")
+      .insert({ user_id: user.id, title: parsed.data.message.slice(0, 80) })
+      .select("id")
+      .single();
+    if (conversationError) {
+      console.error("Failed to create agent conversation", { error: conversationError });
+    }
     conversationId = data?.id ? String(data.id) : undefined;
   }
   if (conversationId) {
-    await supabase.from("agent_messages").insert([
+    const { error: messageError } = await supabase.from("agent_messages").insert([
       { conversation_id: conversationId, user_id: user.id, role: "USER", content: parsed.data.message, source: parsed.data.source },
       { conversation_id: conversationId, user_id: user.id, role: "ASSISTANT", content: reply, source: "TEXT" },
     ]);
-    await supabase.from("agent_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId).eq("user_id", user.id);
+    if (messageError) {
+      console.error("Failed to save agent messages", { error: messageError, conversationId });
+    }
+    const { error: updateError } = await supabase
+      .from("agent_conversations")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", conversationId)
+      .eq("user_id", user.id);
+    if (updateError) {
+      console.error("Failed to update agent conversation", { error: updateError, conversationId });
+    }
   }
   return Response.json({ reply, conversationId, mode, links: deterministic.suggestedLinks ?? [] });
 }

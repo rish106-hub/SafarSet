@@ -41,13 +41,15 @@ export async function loginAction(_state: AuthState, formData: FormData): Promis
     password: parsed.data.password,
   });
   if (error || !data.user) return { error: "Email or password is incorrect.", mode: "login" };
+  let destination = safeNext(parsed.data.next) ?? "/dashboard";
   if (data.user.app_metadata.role !== "admin") {
     const { data: profile } = await supabase.from("profiles").select("beta_access_granted_at,onboarding_complete").eq("user_id", data.user.id).maybeSingle();
     if (!profile?.beta_access_granted_at) { await supabase.auth.signOut(); return { error: "This account does not have beta access yet.", mode: "login" }; }
+    if (!profile.onboarding_complete) {
+      destination = "/onboarding";
+    }
   }
-  const destination = data.user.app_metadata.role === "admin"
-    ? "/admin"
-    : safeNext(parsed.data.next) ?? "/dashboard";
+  destination = data.user.app_metadata.role === "admin" ? "/admin" : destination;
   redirect(destination);
 }
 
@@ -87,7 +89,10 @@ export async function signupAction(_state: AuthState, formData: FormData): Promi
     admin.from("profiles").update({ beta_access_granted_at: now, interest_travel_wallet: parsed.data.interestTravelWallet, interest_loyalty_compass: parsed.data.interestLoyaltyCompass }).eq("user_id", data.user.id),
     admin.schema("private").from("beta_invites").update({ redeemed_at: now, redeemed_by: data.user.id }).eq("id", invite.id).is("redeemed_at", null),
   ]);
-  if (profileError || redeemError) return { error: "Account created, but beta access could not be granted. Contact the operator.", mode: "login" };
+  if (profileError || redeemError) {
+    await supabase.auth.signOut();
+    return { error: "Account created, but beta access could not be granted. Contact the operator.", mode: "login" };
+  }
   if (!data.session) return { error: "Check your email to confirm the account, then sign in.", mode: "login" };
   redirect("/onboarding");
 }
@@ -95,10 +100,13 @@ export async function signupAction(_state: AuthState, formData: FormData): Promi
 export async function googleLoginAction() {
   if (!isSupabaseConfigured()) redirect("/login?error=configuration");
   const supabase = await createSupabaseServerClient();
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const origin = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!origin && process.env.NODE_ENV === "production") {
+    redirect("/login?error=configuration");
+  }
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${origin}/auth/callback`, scopes: "openid email profile" },
+    options: { redirectTo: `${origin ?? "http://localhost:3000"}/auth/callback`, scopes: "openid email profile" },
   });
   if (error || !data.url) redirect("/login?error=google");
   redirect(data.url);

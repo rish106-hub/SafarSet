@@ -19,11 +19,12 @@ export function AgentConsole() {
   async function send(text = input, source: "TEXT" | "VOICE_TRANSCRIPT" = "TEXT") {
     const clean = text.trim();
     if (!clean || busy) return;
-    setBusy(true); setError(""); setInput(""); setEntries((items) => [...items, { role: "USER", text: clean }]);
+    setBusy(true); setError(""); setEntries((items) => [...items, { role: "USER", text: clean }]);
     try {
       const response = await fetch("/api/agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message: clean, conversationId, source }) });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Request failed.");
+      setInput("");
       setConversationId(payload.conversationId); setEntries((items) => [...items, { role: "ASSISTANT", text: payload.reply, links: payload.links, mode: payload.mode }]);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "The agent is unavailable."); }
     finally { setBusy(false); }

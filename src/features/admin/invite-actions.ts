@@ -18,7 +18,10 @@ export async function createBetaInviteAction(_state: InviteState, formData: Form
   const expiresAt = new Date(Date.now() + parsed.data.days * 86_400_000).toISOString();
   const admin = createSupabaseAdminClient();
   const { error } = await admin.schema("private").from("beta_invites").insert({ code_hash: codeHash, allowed_email: parsed.data.email, expires_at: expiresAt, created_by: user.id });
-  if (error) return { error: "Invite could not be created. Apply the latest database migration first." };
+  if (error) {
+    console.error("Failed to create beta invite", { error, email: parsed.data.email });
+    return { error: "Invite could not be created. Apply the latest database migration first." };
+  }
   revalidatePath("/admin");
   return { code, email: parsed.data.email };
 }
