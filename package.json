@@ -30,7 +30,7 @@
     "geist": "^1.7.2",
     "lucide-react": "^1.25.0",
     "next": "16.2.10",
-    "pdfjs-dist": "^5.4.624",
+    "pdfjs-dist": "^6.1.200",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "resend": "6.17.2",
