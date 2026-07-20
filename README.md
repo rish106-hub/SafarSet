@@ -70,21 +70,27 @@ The seed script blocks `admin@123` when `VERCEL_ENV=production`. Use a unique pr
 
 Normal users use the same login page. Admin users are redirected to `/admin`. The admin route is not linked from the public site.
 
-## Google Calendar
+## Google sign-in and Calendar
 
 Google Cloud project: `safarset-502905`. Enable the Google Calendar API, create an External testing OAuth app, add beta users as test users, and create a Web application client with:
 
 ```text
 Authorized JavaScript origin: http://localhost:3000
-Authorized redirect URI: http://localhost:3000/api/connections/google/callback
+Authorized redirect URI 1: http://127.0.0.1:54321/auth/v1/callback
+Authorized redirect URI 2: http://localhost:3000/api/connections/google/callback
 ```
 
-For production, add the exact deployed origin and callback separately:
+The first callback belongs to Supabase Auth and is required for **Continue with Google**. The second belongs to the optional read-only Calendar connection. They are different flows and both must be registered exactly, including scheme, host, port, path, and trailing slash.
+
+For production, add the exact deployed origin and both callbacks separately:
 
 ```text
 https://YOUR_DOMAIN
+https://YOUR_SUPABASE_PROJECT.supabase.co/auth/v1/callback
 https://YOUR_DOMAIN/api/connections/google/callback
 ```
+
+The hosted Supabase callback is shown in Supabase Dashboard → Authentication → Providers → Google. Do not replace it with the Vercel application callback.
 
 Set:
 

@@ -17,9 +17,10 @@ Google Cloud project: `safarset-502905`.
 Local OAuth client settings:
 
 - JavaScript origin: `http://localhost:3000`
-- Redirect URI: `http://localhost:3000/api/connections/google/callback`
+- Supabase Auth redirect URI: `http://127.0.0.1:54321/auth/v1/callback`
+- Calendar redirect URI: `http://localhost:3000/api/connections/google/callback`
 
-The deployed origin and callback must be added after the production domain is known.
+The Google OAuth client must contain both redirect URIs. The deployed origin, hosted Supabase Auth callback, and deployed Calendar callback must be added after the production domain is known.
 
 ## 3. Aviationstack live status
 

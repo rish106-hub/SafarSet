@@ -1,4 +1,4 @@
-import { LogOut } from "lucide-react";
+import { CalendarPlus, LogOut } from "lucide-react";
 import Link from "next/link";
 
 import type { CurrentUser } from "@/application/dal/auth";
@@ -15,6 +15,9 @@ export function ProductShell({ user, children }: Readonly<{ user: CurrentUser; c
           <span className="rounded-full border border-white/15 px-2.5 py-1 font-mono text-[10px] text-[#9FB3C8] lg:mt-5 lg:inline-block">PRIVATE BETA</span>
         </div>
         <ProductNav isAdmin={user.isAdmin} />
+        <div className="hidden px-4 pt-5 lg:block">
+          <Link className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#2CB1BC] px-4 py-3 text-sm font-semibold text-[#102A43] transition hover:bg-[#67E8E8]" href="/trips/new"><CalendarPlus className="size-4" /> Add a trip</Link>
+        </div>
         <div className="hidden border-t border-white/10 p-4 lg:mt-auto lg:block">
           <p className="truncate px-2 text-sm font-medium">{user.fullName || user.email}</p>
           <p className="truncate px-2 text-xs text-[#829AB1]">{user.email}</p>
