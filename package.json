@@ -20,7 +20,7 @@
     "node": ">=20.19.0"
   },
   "dependencies": {
-    "@ai-sdk/react": "^4.0.34",
+    "@ai-sdk/react": "^4.0.40",
     "@base-ui/react": "^1.6.0",
     "@supabase/ssr": "0.12.3",
     "@supabase/supabase-js": "2.110.7",
